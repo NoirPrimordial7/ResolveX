@@ -1,7 +1,8 @@
-import { ClipboardList, LayoutDashboard, PlusCircle, Tickets } from "lucide-react";
+import { ClipboardList, Headphones, LayoutDashboard, PlusCircle, Tickets } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
 import { useAuth } from "../context/AuthContext";
+import { cn } from "../utils/cn";
 
 const customerLinks = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -18,8 +19,8 @@ export default function Sidebar() {
   const links = user?.role === "admin" ? adminLinks : customerLinks;
 
   return (
-    <aside className="md:w-64 md:shrink-0">
-      <nav className="panel-card flex gap-2 overflow-x-auto rounded-sm p-2 md:sticky md:top-20 md:flex-col">
+    <aside className="lg:w-[260px] lg:shrink-0">
+      <nav className="flex gap-2 overflow-x-auto rounded-md border border-neutral-200 bg-white p-2 shadow-sm shadow-neutral-200/50 transition-colors dark:border-neutral-800 dark:bg-neutral-900/80 dark:shadow-none lg:sticky lg:top-20 lg:flex-col lg:overflow-visible">
         {links.map((item) => {
           const Icon = item.icon;
           return (
@@ -27,12 +28,12 @@ export default function Sidebar() {
               key={item.to}
               to={item.to}
               className={({ isActive }) =>
-                [
-                  "flex min-w-fit items-center gap-3 rounded-sm px-4 py-3 text-sm font-semibold transition",
+                cn(
+                  "flex min-w-fit items-center gap-3 rounded-md px-3.5 py-2.5 text-sm font-semibold outline-none transition focus-visible:ring-2 focus-visible:ring-orange-500/25",
                   isActive
-                    ? "bg-orange-500 text-black"
-                    : "text-neutral-300 hover:bg-neutral-800 hover:text-white"
-                ].join(" ")
+                    ? "bg-orange-50 text-orange-700 ring-1 ring-orange-200 dark:bg-orange-500/10 dark:text-orange-300 dark:ring-orange-500/20"
+                    : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-950 dark:text-neutral-400 dark:hover:bg-neutral-800/80 dark:hover:text-white"
+                )
               }
             >
               <Icon size={18} aria-hidden="true" />
@@ -41,10 +42,15 @@ export default function Sidebar() {
           );
         })}
 
-        <div className="mt-2 hidden rounded-sm border border-neutral-800 bg-[#080808] p-4 md:block">
-          <Tickets className="mb-3 text-orange-400" size={22} aria-hidden="true" />
-          <p className="text-sm font-semibold text-white">ResolveX</p>
-          <p className="mt-1 text-xs leading-5 text-neutral-400">Resolve customer issues faster.</p>
+        <div className="mt-2 hidden rounded-md border border-neutral-200 bg-neutral-50 p-4 dark:border-neutral-800 dark:bg-neutral-950/60 lg:block">
+          <div className="mb-3 flex items-center justify-between">
+            <Tickets className="text-orange-600 dark:text-orange-400" size={20} aria-hidden="true" />
+            <Headphones className="text-neutral-400" size={18} aria-hidden="true" />
+          </div>
+          <p className="text-sm font-semibold text-neutral-950 dark:text-white">ResolveX Desk</p>
+          <p className="mt-1 text-xs leading-5 text-neutral-500 dark:text-neutral-400">
+            Clear queues, faster replies, and tighter ownership.
+          </p>
         </div>
       </nav>
     </aside>

@@ -16,3 +16,11 @@ frontend/vite.config.d.ts
 
 .DS_Store
 Thumbs.db
+
+
+# Local database files
+*.db
+*.sqlite
+*.sqlite3
+backend/*.db
+backend/resolvex.db
