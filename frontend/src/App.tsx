@@ -3,6 +3,7 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import AppShell from "./components/AppShell";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import { ThemeProvider } from "./context/ThemeContext";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminTickets from "./pages/AdminTickets";
 import CreateTicket from "./pages/CreateTicket";
@@ -15,7 +16,11 @@ function RootRedirect() {
   const { user, loading } = useAuth();
 
   if (loading) {
-    return <div className="flex min-h-screen items-center justify-center text-neutral-300">Loading ResolveX...</div>;
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-neutral-50 text-sm text-neutral-600 transition-colors dark:bg-neutral-950 dark:text-neutral-400">
+        Loading ResolveX...
+      </div>
+    );
   }
 
   if (!user) {
@@ -35,55 +40,57 @@ function ShellRoute({ children, roles }: { children: React.ReactNode; roles?: Ar
 
 export default function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<RootRedirect />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route
-            path="/dashboard"
-            element={
-              <ShellRoute roles={["customer"]}>
-                <CustomerDashboard />
-              </ShellRoute>
-            }
-          />
-          <Route
-            path="/tickets/new"
-            element={
-              <ShellRoute roles={["customer"]}>
-                <CreateTicket />
-              </ShellRoute>
-            }
-          />
-          <Route
-            path="/tickets/:ticketId"
-            element={
-              <ShellRoute>
-                <TicketDetails />
-              </ShellRoute>
-            }
-          />
-          <Route
-            path="/admin/dashboard"
-            element={
-              <ShellRoute roles={["admin"]}>
-                <AdminDashboard />
-              </ShellRoute>
-            }
-          />
-          <Route
-            path="/admin/tickets"
-            element={
-              <ShellRoute roles={["admin"]}>
-                <AdminTickets />
-              </ShellRoute>
-            }
-          />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </BrowserRouter>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<RootRedirect />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route
+              path="/dashboard"
+              element={
+                <ShellRoute roles={["customer"]}>
+                  <CustomerDashboard />
+                </ShellRoute>
+              }
+            />
+            <Route
+              path="/tickets/new"
+              element={
+                <ShellRoute roles={["customer"]}>
+                  <CreateTicket />
+                </ShellRoute>
+              }
+            />
+            <Route
+              path="/tickets/:ticketId"
+              element={
+                <ShellRoute>
+                  <TicketDetails />
+                </ShellRoute>
+              }
+            />
+            <Route
+              path="/admin/dashboard"
+              element={
+                <ShellRoute roles={["admin"]}>
+                  <AdminDashboard />
+                </ShellRoute>
+              }
+            />
+            <Route
+              path="/admin/tickets"
+              element={
+                <ShellRoute roles={["admin"]}>
+                  <AdminTickets />
+                </ShellRoute>
+              }
+            />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
