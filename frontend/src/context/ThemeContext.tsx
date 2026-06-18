@@ -17,23 +17,23 @@ function getInitialTheme(): Theme {
     return savedTheme;
   }
 
-  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  return "dark";
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(getInitialTheme);
 
   useEffect(() => {
-    document.documentElement.classList.toggle("dark", theme === "dark");
-    document.documentElement.style.colorScheme = theme;
-    localStorage.setItem(STORAGE_KEY, theme);
+    document.documentElement.classList.add("dark");
+    document.documentElement.style.colorScheme = "dark";
+    localStorage.setItem(STORAGE_KEY, "dark");
   }, [theme]);
 
   const value = useMemo(
     () => ({
       theme,
-      setTheme: setThemeState,
-      toggleTheme: () => setThemeState((current) => (current === "dark" ? "light" : "dark"))
+      setTheme: () => setThemeState("dark"),
+      toggleTheme: () => setThemeState("dark")
     }),
     [theme]
   );

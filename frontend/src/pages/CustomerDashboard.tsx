@@ -3,6 +3,7 @@ import { CheckCircle2, Clock3, Inbox, ListChecks, PlusCircle, Sparkles } from "l
 import { Link } from "react-router-dom";
 
 import { ticketApi } from "../api/ticketApi";
+import Avatar from "../components/Avatar";
 import { buttonClassName } from "../components/Button";
 import Card from "../components/Card";
 import EmptyState from "../components/EmptyState";
@@ -53,30 +54,33 @@ export default function CustomerDashboard() {
       />
 
       <Card className="relative overflow-hidden p-5">
-        <div className="absolute inset-y-0 right-0 hidden w-1/3 bg-[radial-gradient(circle_at_70%_35%,rgba(249,115,22,0.18),transparent_45%)] dark:block" />
+        <div className="absolute inset-y-0 right-0 hidden w-1/3 bg-[radial-gradient(circle_at_70%_35%,rgba(231,111,81,0.2),transparent_45%)] lg:block" />
         <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="min-w-0">
-            <p className="inline-flex items-center gap-2 rounded-full border border-orange-200 bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-700 dark:border-orange-500/20 dark:bg-orange-500/10 dark:text-orange-300">
-              <Sparkles size={14} aria-hidden="true" />
-              Welcome back
-            </p>
-            <h2 className="mt-4 text-xl font-semibold text-neutral-950 dark:text-white">{user?.full_name}</h2>
-            <p className="mt-2 max-w-4xl text-sm leading-6 text-neutral-600 dark:text-neutral-400">
-              Create a ticket with enough context, then follow status updates and replies from this dashboard.
-            </p>
+          <div className="flex min-w-0 items-start gap-4">
+            <Avatar size="lg" user={user} />
+            <div className="min-w-0">
+              <p className="inline-flex items-center gap-2 rounded-full border border-accent-500/20 bg-accent-500/10 px-3 py-1 text-xs font-semibold text-accent-200">
+                <Sparkles size={14} aria-hidden="true" />
+                Welcome back
+              </p>
+              <h2 className="mt-4 text-xl font-semibold text-[#F5F7FB]">{user?.full_name}</h2>
+              <p className="mt-2 max-w-4xl text-sm leading-6 text-[#AAB3C5]">
+                Create a ticket with enough context, then follow status updates and replies from this dashboard.
+              </p>
+            </div>
           </div>
           <div className="grid grid-cols-3 gap-3 sm:w-72 xl:w-80">
-            <div className="rounded-md border border-neutral-200 bg-neutral-50 p-3 text-center dark:border-neutral-800 dark:bg-neutral-950/50">
-              <p className="text-lg font-semibold text-neutral-950 dark:text-white">{stats.total}</p>
-              <p className="text-xs text-neutral-500 dark:text-neutral-400">Total</p>
+            <div className="rounded-md border border-white/10 bg-white/[0.04] p-3 text-center">
+              <p className="text-lg font-semibold text-[#F5F7FB]">{stats.total}</p>
+              <p className="text-xs text-[#AAB3C5]">Total</p>
             </div>
-            <div className="rounded-md border border-neutral-200 bg-neutral-50 p-3 text-center dark:border-neutral-800 dark:bg-neutral-950/50">
-              <p className="text-lg font-semibold text-neutral-950 dark:text-white">{stats.open}</p>
-              <p className="text-xs text-neutral-500 dark:text-neutral-400">Open</p>
+            <div className="rounded-md border border-white/10 bg-white/[0.04] p-3 text-center">
+              <p className="text-lg font-semibold text-[#F5F7FB]">{stats.open}</p>
+              <p className="text-xs text-[#AAB3C5]">Open</p>
             </div>
-            <div className="rounded-md border border-neutral-200 bg-neutral-50 p-3 text-center dark:border-neutral-800 dark:bg-neutral-950/50">
-              <p className="text-lg font-semibold text-neutral-950 dark:text-white">{stats.resolved}</p>
-              <p className="text-xs text-neutral-500 dark:text-neutral-400">Done</p>
+            <div className="rounded-md border border-white/10 bg-white/[0.04] p-3 text-center">
+              <p className="text-lg font-semibold text-[#F5F7FB]">{stats.resolved}</p>
+              <p className="text-xs text-[#AAB3C5]">Done</p>
             </div>
           </div>
         </div>
@@ -92,8 +96,8 @@ export default function CustomerDashboard() {
       <Card className="p-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-lg font-semibold text-neutral-950 dark:text-white">My Tickets</h2>
-            <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">Filter your queue by current status.</p>
+            <h2 className="text-lg font-semibold text-[#F5F7FB]">My Tickets</h2>
+            <p className="mt-1 text-sm text-[#AAB3C5]">Filter your queue by current status.</p>
           </div>
           <Select
             className="sm:w-56"
@@ -111,7 +115,7 @@ export default function CustomerDashboard() {
       </Card>
 
       {loading ? (
-        <Card className="p-5 text-sm text-neutral-600 dark:text-neutral-400">Loading tickets...</Card>
+        <Card className="p-5 text-sm text-[#AAB3C5]">Loading tickets...</Card>
       ) : tickets.length === 0 ? (
         <EmptyState
           action={
@@ -122,7 +126,7 @@ export default function CustomerDashboard() {
           }
           description="Create a ticket when you need help from the support team. It will appear here immediately."
           icon={Inbox}
-          title="No tickets found"
+          title={statusFilter ? "No tickets match this filter" : "You're all caught up"}
         />
       ) : (
         <div className="grid gap-4 2xl:grid-cols-2">

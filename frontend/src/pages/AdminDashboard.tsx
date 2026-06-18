@@ -3,6 +3,7 @@ import { AlertTriangle, ArrowRight, CheckCircle2, Clock3, Flame, Inbox, ListChec
 import { Link } from "react-router-dom";
 
 import { ticketApi } from "../api/ticketApi";
+import Avatar from "../components/Avatar";
 import { buttonClassName } from "../components/Button";
 import Card from "../components/Card";
 import EmptyState from "../components/EmptyState";
@@ -31,7 +32,7 @@ export default function AdminDashboard() {
   }, [dashboard]);
 
   if (!dashboard) {
-    return <Card className="p-6 text-sm text-neutral-600 dark:text-neutral-400">Loading dashboard...</Card>;
+    return <Card className="p-6 text-sm text-[#AAB3C5]">Loading dashboard...</Card>;
   }
 
   const maxPriorityCount = Math.max(...Object.values(priorityCounts), 1);
@@ -70,8 +71,8 @@ export default function AdminDashboard() {
         <section className="space-y-4">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <h2 className="text-lg font-semibold text-neutral-950 dark:text-white">Recent Tickets</h2>
-              <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">Newest customer issues entering the queue.</p>
+              <h2 className="text-lg font-semibold text-[#F5F7FB]">Recent Tickets</h2>
+              <p className="mt-1 text-sm text-[#AAB3C5]">Newest customer issues entering the queue.</p>
             </div>
           </div>
           {dashboard.recent_tickets.length === 0 ? (
@@ -97,19 +98,19 @@ export default function AdminDashboard() {
         <div className="space-y-5">
           <Card className="h-fit p-5">
             <div>
-              <h2 className="text-lg font-semibold text-neutral-950 dark:text-white">Priority Overview</h2>
-              <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">Recent queue pressure by priority.</p>
+              <h2 className="text-lg font-semibold text-[#F5F7FB]">Priority Overview</h2>
+              <p className="mt-1 text-sm text-[#AAB3C5]">Recent queue pressure by priority.</p>
             </div>
             <div className="mt-5 space-y-4">
               {priorities.map((priority) => (
                 <div key={priority}>
                   <div className="mb-2 flex items-center justify-between text-sm">
-                    <span className="font-medium text-neutral-700 dark:text-neutral-300">{priority}</span>
-                    <span className="font-semibold text-neutral-500 dark:text-neutral-400">{priorityCounts[priority]}</span>
+                    <span className="font-medium text-[#DCE3F2]">{priority}</span>
+                    <span className="font-semibold text-[#AAB3C5]">{priorityCounts[priority]}</span>
                   </div>
-                  <div className="h-2 rounded-full bg-neutral-100 dark:bg-neutral-800">
+                  <div className="h-2 rounded-full bg-white/10">
                     <div
-                      className="h-2 rounded-full bg-orange-500"
+                      className="h-2 rounded-full bg-accent-500"
                       style={{ width: `${Math.max(8, (priorityCounts[priority] / maxPriorityCount) * 100)}%` }}
                     />
                   </div>
@@ -121,34 +122,37 @@ export default function AdminDashboard() {
           <Card className="h-fit p-5">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <h2 className="text-lg font-semibold text-neutral-950 dark:text-white">Agent Workload</h2>
-                <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">Active ticket ownership by agent.</p>
+                <h2 className="text-lg font-semibold text-[#F5F7FB]">Agent Workload</h2>
+                <p className="mt-1 text-sm text-[#AAB3C5]">Active ticket ownership by agent.</p>
               </div>
-              <AlertTriangle className="text-orange-500" size={18} aria-hidden="true" />
+              <AlertTriangle className="text-accent-400" size={18} aria-hidden="true" />
             </div>
             <div className="mt-5 space-y-4">
               {dashboard.agent_workload.length === 0 ? (
-                <p className="text-sm text-neutral-500 dark:text-neutral-400">No support agents have been created.</p>
+                <p className="text-sm text-[#AAB3C5]">No support agents have been created.</p>
               ) : (
                 dashboard.agent_workload.map((agent) => (
-                  <div key={agent.id} className="rounded-md border border-neutral-200 p-3 dark:border-neutral-800">
+                  <div key={agent.id} className="rounded-md border border-white/10 bg-white/[0.03] p-3">
                     <div className="flex items-center justify-between gap-3">
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-semibold text-neutral-950 dark:text-white">{agent.full_name}</p>
-                        <p className="truncate text-xs text-neutral-500 dark:text-neutral-400">{agent.email}</p>
+                      <div className="flex min-w-0 items-center gap-3">
+                        <Avatar size="sm" user={agent} />
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-semibold text-[#F5F7FB]">{agent.full_name}</p>
+                          <p className="truncate text-xs text-[#AAB3C5]">{agent.email}</p>
+                        </div>
                       </div>
-                      <span className="rounded-full bg-orange-50 px-2.5 py-1 text-xs font-semibold text-orange-700 dark:bg-orange-500/10 dark:text-orange-300">
+                      <span className="rounded-full bg-accent-500/10 px-2.5 py-1 text-xs font-semibold text-accent-200">
                         {agent.active_ticket_count} active
                       </span>
                     </div>
                     <div className="mt-3 grid grid-cols-3 gap-2 text-center text-xs">
-                      <span className="rounded-md bg-neutral-50 px-2 py-1 text-neutral-600 dark:bg-neutral-950/50 dark:text-neutral-400">
+                      <span className="rounded-md bg-white/[0.05] px-2 py-1 text-[#AAB3C5]">
                         {agent.open_ticket_count} open
                       </span>
-                      <span className="rounded-md bg-neutral-50 px-2 py-1 text-neutral-600 dark:bg-neutral-950/50 dark:text-neutral-400">
+                      <span className="rounded-md bg-white/[0.05] px-2 py-1 text-[#AAB3C5]">
                         {agent.in_progress_ticket_count} active
                       </span>
-                      <span className="rounded-md bg-neutral-50 px-2 py-1 text-neutral-600 dark:bg-neutral-950/50 dark:text-neutral-400">
+                      <span className="rounded-md bg-white/[0.05] px-2 py-1 text-[#AAB3C5]">
                         {agent.resolved_ticket_count} done
                       </span>
                     </div>

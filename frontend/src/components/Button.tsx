@@ -6,17 +6,17 @@ type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
 type ButtonSize = "sm" | "md";
 
 const baseClasses =
-  "inline-flex items-center justify-center gap-2 rounded-md font-semibold outline-none transition disabled:cursor-not-allowed disabled:opacity-60 focus-visible:ring-2 focus-visible:ring-orange-500/35";
+  "inline-flex items-center justify-center gap-2 rounded-md font-semibold outline-none transition disabled:cursor-not-allowed disabled:opacity-60 focus-visible:ring-2 focus-visible:ring-accent-500/35";
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary:
-    "bg-orange-600 text-white shadow-sm shadow-orange-600/20 hover:bg-orange-500 dark:bg-orange-500 dark:text-neutral-950 dark:hover:bg-orange-400",
+    "bg-accent-500 text-white shadow-lg shadow-accent-600/20 hover:bg-accent-400 dark:bg-accent-500 dark:text-white dark:hover:bg-accent-400",
   secondary:
-    "border border-neutral-200 bg-white text-neutral-800 hover:border-neutral-300 hover:bg-neutral-50 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:border-neutral-700 dark:hover:bg-neutral-800",
+    "border border-white/10 bg-white/[0.04] text-[#DCE3F2] hover:border-white/20 hover:bg-white/[0.07] dark:border-white/10 dark:bg-white/[0.04] dark:text-[#DCE3F2] dark:hover:border-white/20 dark:hover:bg-white/[0.07]",
   ghost:
-    "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-950 dark:text-neutral-300 dark:hover:bg-neutral-900 dark:hover:text-white",
+    "text-[#AAB3C5] hover:bg-white/[0.06] hover:text-white dark:text-[#AAB3C5] dark:hover:bg-white/[0.06] dark:hover:text-white",
   danger:
-    "border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 dark:border-red-900/70 dark:bg-red-950/30 dark:text-red-300 dark:hover:bg-red-950/60"
+    "border border-red-500/25 bg-red-500/10 text-red-200 hover:bg-red-500/15 dark:border-red-500/25 dark:bg-red-500/10 dark:text-red-200 dark:hover:bg-red-500/15"
 };
 
 const sizeClasses: Record<ButtonSize, string> = {

@@ -7,6 +7,7 @@ import type {
   ReassignmentRequest,
   ReassignmentRequestStatus,
   Ticket,
+  CommentAttachment,
   TicketCategory,
   TicketListResponse,
   TicketPriority,
@@ -42,8 +43,8 @@ export const ticketApi = {
   ticketDetails(ticketId: number) {
     return api.get<Ticket>(`/tickets/${ticketId}`).then((response) => response.data);
   },
-  addComment(ticketId: number, message: string) {
-    return api.post(`/tickets/${ticketId}/comments`, { message }).then((response) => response.data);
+  addComment(ticketId: number, message: string, attachments: CommentAttachment[] = []) {
+    return api.post(`/tickets/${ticketId}/comments`, { message, attachments }).then((response) => response.data);
   },
   agentDashboard() {
     return api.get<AgentDashboardResponse>("/agent/dashboard").then((response) => response.data);
@@ -60,8 +61,8 @@ export const ticketApi = {
   agentUpdateStatus(ticketId: number, status: TicketStatus) {
     return api.patch<Ticket>(`/agent/tickets/${ticketId}/status`, { status }).then((response) => response.data);
   },
-  agentAddComment(ticketId: number, message: string) {
-    return api.post(`/agent/tickets/${ticketId}/comments`, { message }).then((response) => response.data);
+  agentAddComment(ticketId: number, message: string, attachments: CommentAttachment[] = []) {
+    return api.post(`/agent/tickets/${ticketId}/comments`, { message, attachments }).then((response) => response.data);
   },
   agentRequestReassignment(ticketId: number, reason: string) {
     return api

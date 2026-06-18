@@ -65,7 +65,7 @@ export default function CreateTicket() {
                 <label className="label" htmlFor="title">
                   Ticket title
                 </label>
-                <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">Use a short summary of the issue or request.</p>
+                <p className="mt-1 text-sm text-[#AAB3C5]">Use a short summary of the issue or request.</p>
                 <Input
                   className="mt-2"
                   id="title"
@@ -82,7 +82,7 @@ export default function CreateTicket() {
                 <label className="label" htmlFor="description">
                   Description
                 </label>
-                <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
+                <p className="mt-1 text-sm text-[#AAB3C5]">
                   Include steps taken, expected behavior, screenshots context, or affected users.
                 </p>
                 <Textarea
@@ -98,24 +98,24 @@ export default function CreateTicket() {
 
               <div>
                 <div className="flex items-center gap-2">
-                  <Layers className="text-orange-600 dark:text-orange-400" size={18} aria-hidden="true" />
-                  <h2 className="text-sm font-semibold text-neutral-950 dark:text-white">Category</h2>
+                  <Layers className="text-accent-400" size={18} aria-hidden="true" />
+                  <h2 className="text-sm font-semibold text-[#F5F7FB]">Category</h2>
                 </div>
                 <div className="mt-3 grid gap-3 sm:grid-cols-2">
                   {categories.map((item) => (
                     <button
                       key={item}
                       className={cn(
-                        "rounded-md border p-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500/25",
+                        "rounded-md border p-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/25",
                         category === item
-                          ? "border-orange-300 bg-orange-50 text-orange-800 dark:border-orange-500/35 dark:bg-orange-500/10 dark:text-orange-200"
-                          : "border-neutral-200 bg-white text-neutral-700 hover:border-neutral-300 hover:bg-neutral-50 dark:border-neutral-800 dark:bg-neutral-950/40 dark:text-neutral-300 dark:hover:border-neutral-700 dark:hover:bg-neutral-900"
+                          ? "border-accent-500/35 bg-accent-500/10 text-accent-100"
+                          : "border-white/10 bg-white/[0.03] text-[#DCE3F2] hover:border-white/20 hover:bg-white/[0.06]"
                       )}
                       onClick={() => setCategory(item)}
                       type="button"
                     >
                       <span className="block text-sm font-semibold">{item}</span>
-                      <span className="mt-1 block text-xs leading-5 text-neutral-500 dark:text-neutral-400">{categoryDescriptions[item]}</span>
+                      <span className="mt-1 block text-xs leading-5 text-[#AAB3C5]">{categoryDescriptions[item]}</span>
                     </button>
                   ))}
                 </div>
@@ -123,24 +123,24 @@ export default function CreateTicket() {
 
               <div>
                 <div className="flex items-center gap-2">
-                  <AlertTriangle className="text-orange-600 dark:text-orange-400" size={18} aria-hidden="true" />
-                  <h2 className="text-sm font-semibold text-neutral-950 dark:text-white">Priority</h2>
+                  <AlertTriangle className="text-accent-400" size={18} aria-hidden="true" />
+                  <h2 className="text-sm font-semibold text-[#F5F7FB]">Priority</h2>
                 </div>
                 <div className="mt-3 grid gap-3 sm:grid-cols-2">
                   {priorities.map((item) => (
                     <button
                       key={item}
                       className={cn(
-                        "rounded-md border p-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500/25",
+                        "rounded-md border p-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/25",
                         priority === item
-                          ? "border-orange-300 bg-orange-50 text-orange-800 dark:border-orange-500/35 dark:bg-orange-500/10 dark:text-orange-200"
-                          : "border-neutral-200 bg-white text-neutral-700 hover:border-neutral-300 hover:bg-neutral-50 dark:border-neutral-800 dark:bg-neutral-950/40 dark:text-neutral-300 dark:hover:border-neutral-700 dark:hover:bg-neutral-900"
+                          ? "border-accent-500/35 bg-accent-500/10 text-accent-100"
+                          : "border-white/10 bg-white/[0.03] text-[#DCE3F2] hover:border-white/20 hover:bg-white/[0.06]"
                       )}
                       onClick={() => setPriority(item)}
                       type="button"
                     >
                       <span className="block text-sm font-semibold">{item}</span>
-                      <span className="mt-1 block text-xs leading-5 text-neutral-500 dark:text-neutral-400">{priorityDescriptions[item]}</span>
+                      <span className="mt-1 block text-xs leading-5 text-[#AAB3C5]">{priorityDescriptions[item]}</span>
                     </button>
                   ))}
                 </div>
@@ -159,17 +159,17 @@ export default function CreateTicket() {
             </div>
           </Card>
 
-          <Card className="h-fit bg-neutral-50 p-5 dark:bg-neutral-900/60">
-            <MessageSquareText className="text-orange-600 dark:text-orange-400" size={22} aria-hidden="true" />
-            <h2 className="mt-4 text-base font-semibold text-neutral-950 dark:text-white">Helpful ticket details</h2>
-            <div className="mt-4 space-y-4 text-sm leading-6 text-neutral-600 dark:text-neutral-400">
+          <Card className="h-fit bg-[#11141B]/92 p-5">
+            <MessageSquareText className="text-accent-400" size={22} aria-hidden="true" />
+            <h2 className="mt-4 text-base font-semibold text-[#F5F7FB]">Helpful ticket details</h2>
+            <div className="mt-4 space-y-4 text-sm leading-6 text-[#AAB3C5]">
               <p>Include the exact page, account, or workflow where the issue happens.</p>
               <p>Mention whether this blocks work for one user, many users, or an entire team.</p>
               <p>Keep sensitive data out of the description unless support explicitly requests it.</p>
             </div>
-            <div className="mt-5 rounded-md border border-neutral-200 bg-white p-3 text-xs text-neutral-500 dark:border-neutral-800 dark:bg-neutral-950/50 dark:text-neutral-400">
-              Selected: <span className="font-semibold text-neutral-800 dark:text-neutral-200">{category}</span> -{" "}
-              <span className="font-semibold text-neutral-800 dark:text-neutral-200">{priority}</span>
+            <div className="mt-5 rounded-md border border-white/10 bg-white/[0.04] p-3 text-xs text-[#AAB3C5]">
+              Selected: <span className="font-semibold text-[#F5F7FB]">{category}</span> -{" "}
+              <span className="font-semibold text-[#F5F7FB]">{priority}</span>
             </div>
           </Card>
         </div>

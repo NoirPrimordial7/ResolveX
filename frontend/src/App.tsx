@@ -29,7 +29,7 @@ function RootRedirect() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-neutral-50 text-sm text-neutral-600 transition-colors dark:bg-neutral-950 dark:text-neutral-400">
+      <div className="premium-pattern flex min-h-screen items-center justify-center text-sm text-[#AAB3C5] transition-colors">
         Loading ResolveX...
       </div>
     );

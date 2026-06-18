@@ -3,6 +3,7 @@ import { Eye, Inbox, RotateCcw, Search } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import { ticketApi, type AgentTicketFilters } from "../api/ticketApi";
+import Avatar from "../components/Avatar";
 import Button, { buttonClassName } from "../components/Button";
 import Card from "../components/Card";
 import EmptyState from "../components/EmptyState";
@@ -66,7 +67,7 @@ export default function AgentTickets() {
       <Card className="p-4">
         <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_180px_180px_200px]">
           <div className="relative min-w-0">
-            <Search className="pointer-events-none absolute left-3 top-3 text-neutral-400 dark:text-neutral-500" size={18} />
+            <Search className="pointer-events-none absolute left-3 top-3 text-[#6F7A91]" size={18} />
             <Input
               className="pl-10"
               placeholder="Search assigned tickets"
@@ -102,7 +103,7 @@ export default function AgentTickets() {
       </Card>
 
       {loading ? (
-        <Card className="p-5 text-sm text-neutral-600 dark:text-neutral-400">Loading assigned tickets...</Card>
+        <Card className="p-5 text-sm text-[#AAB3C5]">Loading assigned tickets...</Card>
       ) : visibleTickets.length === 0 ? (
         <EmptyState
           description="Assigned tickets that match your filters will appear here."
@@ -116,11 +117,14 @@ export default function AgentTickets() {
               <Card key={ticket.id} className="p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-orange-600 dark:text-orange-400">
+                    <p className="text-xs font-semibold uppercase text-accent-400">
                       {ticket.category}
                     </p>
-                    <h2 className="mt-2 line-clamp-2 text-base font-semibold text-neutral-950 dark:text-white">{ticket.title}</h2>
-                    <p className="mt-1 truncate text-sm text-neutral-500 dark:text-neutral-400">{ticket.created_by.full_name}</p>
+                    <h2 className="mt-2 line-clamp-2 text-base font-semibold text-[#F5F7FB]">{ticket.title}</h2>
+                    <p className="mt-1 flex min-w-0 items-center gap-2 truncate text-sm text-[#AAB3C5]">
+                      <Avatar size="sm" user={ticket.created_by} />
+                      <span className="truncate">{ticket.created_by.full_name}</span>
+                    </p>
                   </div>
                   <Link
                     className={buttonClassName({ className: "shrink-0 px-3", size: "sm", variant: "secondary" })}
