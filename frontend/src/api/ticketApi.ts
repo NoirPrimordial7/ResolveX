@@ -69,52 +69,6 @@ export const ticketApi = {
       .post<ReassignmentRequest>(`/agent/tickets/${ticketId}/reassignment-requests`, { reason })
       .then((response) => response.data);
   },
-  agentDashboard() {
-    return api.get<AgentDashboardResponse>("/agent/dashboard").then((response) => response.data);
-  },
-  agentTickets(filters: AgentTicketFilters = {}) {
-    const params = Object.fromEntries(
-      Object.entries(filters).filter(([, value]) => value !== "" && value !== undefined && value !== null)
-    );
-    return api.get<Ticket[]>("/agent/tickets", { params }).then((response) => response.data);
-  },
-  agentTicketDetails(ticketId: number) {
-    return api.get<Ticket>(`/agent/tickets/${ticketId}`).then((response) => response.data);
-  },
-  agentUpdateStatus(ticketId: number, status: TicketStatus) {
-    return api.patch<Ticket>(`/agent/tickets/${ticketId}/status`, { status }).then((response) => response.data);
-  },
-  agentAddComment(ticketId: number, message: string) {
-    return api.post(`/agent/tickets/${ticketId}/comments`, { message }).then((response) => response.data);
-  },
-  agentRequestReassignment(ticketId: number, reason: string) {
-    return api
-      .post<ReassignmentRequest>(`/agent/tickets/${ticketId}/reassignment-requests`, { reason })
-      .then((response) => response.data);
-  },
-  agentDashboard() {
-    return api.get<AgentDashboardResponse>("/agent/dashboard").then((response) => response.data);
-  },
-  agentTickets(filters: AgentTicketFilters = {}) {
-    const params = Object.fromEntries(
-      Object.entries(filters).filter(([, value]) => value !== "" && value !== undefined && value !== null)
-    );
-    return api.get<Ticket[]>("/agent/tickets", { params }).then((response) => response.data);
-  },
-  agentTicketDetails(ticketId: number) {
-    return api.get<Ticket>(`/agent/tickets/${ticketId}`).then((response) => response.data);
-  },
-  agentUpdateStatus(ticketId: number, status: TicketStatus) {
-    return api.patch<Ticket>(`/agent/tickets/${ticketId}/status`, { status }).then((response) => response.data);
-  },
-  agentAddComment(ticketId: number, message: string) {
-    return api.post(`/agent/tickets/${ticketId}/comments`, { message }).then((response) => response.data);
-  },
-  agentRequestReassignment(ticketId: number, reason: string) {
-    return api
-      .post<ReassignmentRequest>(`/agent/tickets/${ticketId}/reassignment-requests`, { reason })
-      .then((response) => response.data);
-  },
   adminDashboard() {
     return api.get<AdminDashboardResponse>("/admin/dashboard").then((response) => response.data);
   },
