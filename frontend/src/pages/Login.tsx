@@ -1,10 +1,10 @@
 import { FormEvent, useState } from "react";
-import { ArrowRight, CheckCircle2, LockKeyhole, Mail, ShieldCheck, Sparkles } from "lucide-react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 
 import Button from "../components/Button";
 import Card from "../components/Card";
 import { Input } from "../components/Input";
+import PixelIcon from "../components/PixelIcon";
 import ThemeToggle from "../components/ThemeToggle";
 import { useAuth } from "../context/AuthContext";
 
@@ -47,56 +47,61 @@ export default function Login() {
   }
 
   return (
-    <div className="premium-pattern min-h-screen text-[#F5F7FB] transition-colors">
+    <div className="premium-pattern min-h-screen text-[#F5F1EA] transition-colors">
       <div className="absolute right-4 top-4 z-10">
         <ThemeToggle />
       </div>
 
-      <main className="mx-auto grid min-h-screen w-full max-w-7xl gap-8 px-4 py-6 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:px-8">
-        <section className="chat-pattern relative hidden min-h-[calc(100vh-3rem)] overflow-hidden rounded-md border border-white/10 bg-[#11141B] p-8 text-white shadow-2xl shadow-black/35 lg:flex lg:flex-col lg:justify-between">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(231,111,81,0.24),transparent_34%),linear-gradient(135deg,rgba(255,255,255,0.08),transparent_38%)]" />
-          <div className="relative">
+      <main className="mx-auto grid min-h-screen w-full max-w-7xl gap-8 px-4 py-20 sm:px-6 lg:grid-cols-[1.08fr_0.92fr] lg:px-8 lg:py-6">
+        <section className="relative flex min-h-[44vh] flex-col justify-between overflow-hidden border border-white/10 bg-[#0B0B0A]/84 p-6 shadow-2xl shadow-black/35 lg:min-h-[calc(100vh-3rem)] lg:p-8">
+          <div className="pointer-events-none absolute inset-0 chat-pattern opacity-70" />
+          <div className="relative z-[1]">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-md bg-accent-500 text-white shadow-glow">
-                <ShieldCheck size={21} aria-hidden="true" />
+              <div className="flex h-11 w-11 items-center justify-center rounded-sm bg-accent-500 text-[#0B0B0A] shadow-glow">
+                <PixelIcon name="shield" size={28} />
               </div>
               <div>
-                <p className="text-sm font-semibold">ResolveX</p>
-                <p className="text-xs text-neutral-400">Support operations dashboard</p>
+                <p className="display-type text-3xl leading-none">ResolveX</p>
+                <p className="text-[11px] font-black uppercase text-[#A7A29A]">Support operations</p>
               </div>
             </div>
 
-            <div className="mt-24 max-w-xl">
-              <p className="inline-flex items-center gap-2 rounded-full border border-accent-500/30 bg-accent-500/10 px-3 py-1 text-xs font-semibold text-accent-200">
-                <Sparkles size={14} aria-hidden="true" />
-                Premium ticket management
+            <div className="mt-16 max-w-2xl lg:mt-24">
+              <p className="eyebrow">
+                Support operations
               </p>
-              <h1 className="mt-6 text-5xl font-semibold tracking-tight">Resolve customer issues faster.</h1>
-              <p className="mt-5 max-w-lg text-base leading-7 text-neutral-300">
+              <h1 className="display-type mt-6 text-6xl leading-[0.88] text-[#F5F1EA] sm:text-7xl xl:text-8xl">
+                Resolve Tickets.
+                <br />
+                Assign Fast.
+                <br />
+                Close Clean.
+              </h1>
+              <p className="mt-6 max-w-xl text-base leading-7 text-[#A7A29A]">
                 Prioritize queues, assign ownership, and keep every conversation moving from one focused workspace.
               </p>
             </div>
           </div>
 
-          <div className="relative grid gap-3 sm:grid-cols-3">
-            {["Live queue clarity", "Role aware routing", "Fast customer replies"].map((item) => (
-              <div key={item} className="rounded-md border border-white/10 bg-white/[0.04] p-4">
-                <CheckCircle2 className="mb-3 text-accent-400" size={18} aria-hidden="true" />
-                <p className="text-sm font-medium text-white">{item}</p>
+          <div className="relative z-[1] mt-10 grid gap-3 sm:grid-cols-3 lg:mt-0">
+            {["Live queue clarity", "Role-aware routing", "Fast replies"].map((item) => (
+              <div key={item} className="border border-white/10 bg-white/[0.04] p-4">
+                <PixelIcon className="mb-3 text-accent-400" name="check" size={20} />
+                <p className="text-xs font-black uppercase text-[#F5F1EA]">{item}</p>
               </div>
             ))}
           </div>
         </section>
 
-        <section className="flex min-h-[calc(100vh-3rem)] items-center justify-center py-14">
+        <section className="flex items-center justify-center lg:min-h-[calc(100vh-3rem)]">
           <div className="w-full max-w-md">
             <div className="mb-8">
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-md bg-accent-500 text-white shadow-glow lg:hidden">
-                <ShieldCheck size={24} aria-hidden="true" />
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-sm bg-accent-500 text-[#0B0B0A] shadow-glow lg:hidden">
+                <PixelIcon name="shield" size={30} />
               </div>
-              <p className="text-sm font-semibold uppercase text-accent-400">Welcome back</p>
-              <h1 className="mt-3 text-3xl font-semibold tracking-tight text-neutral-950 dark:text-white">Sign in to ResolveX</h1>
-              <p className="mt-2 text-sm leading-6 text-neutral-600 dark:text-neutral-400">
+              <p className="eyebrow">Welcome back</p>
+              <h1 className="display-type mt-4 text-5xl leading-none text-[#F5F1EA]">Sign in</h1>
+              <p className="mt-3 text-sm leading-6 text-[#A7A29A]">
                 Manage support tickets with a focused admin-grade workspace.
               </p>
             </div>
@@ -109,7 +114,7 @@ export default function Login() {
                       Email
                     </label>
                     <div className="relative mt-2">
-                    <Mail className="pointer-events-none absolute left-3 top-3 text-[#6F7A91]" size={18} />
+                      <PixelIcon className="pointer-events-none absolute left-3 top-2.5 text-[#726D66]" name="mail" size={20} />
                       <Input
                         className="pl-10"
                         id="email"
@@ -126,7 +131,7 @@ export default function Login() {
                       Password
                     </label>
                     <div className="relative mt-2">
-                      <LockKeyhole className="pointer-events-none absolute left-3 top-3 text-[#6F7A91]" size={18} />
+                      <PixelIcon className="pointer-events-none absolute left-3 top-2.5 text-[#726D66]" name="lock" size={20} />
                       <Input
                         className="pl-10"
                         id="password"
@@ -146,11 +151,11 @@ export default function Login() {
 
                   <Button className="w-full" disabled={submitting} type="submit" variant="primary">
                     {submitting ? "Signing in..." : "Login"}
-                    <ArrowRight size={18} aria-hidden="true" />
+                    <PixelIcon name="arrow" size={18} />
                   </Button>
                 </div>
 
-                <p className="mt-6 text-center text-sm text-neutral-600 dark:text-neutral-400">
+                <p className="mt-6 text-center text-sm text-[#A7A29A]">
                   New customer?{" "}
                   <Link className="font-semibold text-accent-400 hover:text-accent-300" to="/register">
                     Create account
@@ -160,12 +165,12 @@ export default function Login() {
             </Card>
 
             <Card className="mt-4 p-4">
-              <p className="text-sm font-semibold text-neutral-950 dark:text-white">Demo credentials</p>
+              <p className="text-xs font-black uppercase text-[#F5F1EA]">Demo credentials</p>
               <div className="mt-3 grid gap-2">
                 {demoAccounts.map((account) => (
                   <button
                     key={account.email}
-                    className="flex items-center justify-between gap-3 rounded-md border border-white/10 bg-white/[0.03] px-3 py-2 text-left text-sm transition hover:border-accent-500/40 hover:bg-accent-500/10"
+                    className="flex items-center justify-between gap-3 rounded-sm border border-white/10 bg-[#0B0B0A]/70 px-3 py-2 text-left text-sm transition hover:border-accent-500/45 hover:bg-accent-500/10"
                     onClick={() => {
                       setEmail(account.email);
                       setPassword(account.password);
@@ -173,12 +178,12 @@ export default function Login() {
                     type="button"
                   >
                     <span>
-                      <span className="block font-medium text-neutral-950 dark:text-white">{account.label}</span>
-                      <span className="block text-xs text-neutral-500 dark:text-neutral-400">
-                        {account.email} / {account.password}
+                      <span className="block text-xs font-black uppercase text-[#F5F1EA]">{account.label}</span>
+                      <span className="block font-mono text-xs text-[#A7A29A]">
+                        {account.email} -- {account.password}
                       </span>
                     </span>
-                    <ArrowRight className="text-neutral-400" size={16} aria-hidden="true" />
+                    <PixelIcon className="text-accent-400" name="command" size={18} />
                   </button>
                 ))}
               </div>

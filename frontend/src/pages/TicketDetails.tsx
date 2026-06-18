@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { ArrowLeft, Inbox } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 
 import { ticketApi } from "../api/ticketApi";
@@ -7,6 +6,7 @@ import { buttonClassName } from "../components/Button";
 import Card from "../components/Card";
 import ChatThread from "../components/ChatThread";
 import EmptyState from "../components/EmptyState";
+import PixelIcon from "../components/PixelIcon";
 import TicketMetaSidebar from "../components/TicketMetaSidebar";
 import { useAuth } from "../context/AuthContext";
 import type { CommentAttachment, Ticket } from "../types";
@@ -54,7 +54,7 @@ export default function TicketDetails() {
   }
 
   if (loading) {
-    return <Card className="p-6 text-sm text-[#AAB3C5]">Loading ticket...</Card>;
+    return <Card className="p-6 text-sm text-[#A7A29A]">Loading ticket...</Card>;
   }
 
   if (!ticket) {
@@ -66,7 +66,6 @@ export default function TicketDetails() {
           </Link>
         }
         description="This ticket may have been removed or you may not have access to it."
-        icon={Inbox}
         title="Ticket not found"
       />
     );
@@ -75,7 +74,7 @@ export default function TicketDetails() {
   return (
     <div className="space-y-5">
       <Link className={buttonClassName({ variant: "secondary" })} to={backHref}>
-        <ArrowLeft size={18} aria-hidden="true" />
+        <PixelIcon className="rotate-180" name="arrow" size={18} />
         Back
       </Link>
 

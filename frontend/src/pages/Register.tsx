@@ -1,10 +1,10 @@
 import { FormEvent, useState } from "react";
-import { ArrowRight, CheckCircle2, Mail, ShieldCheck, UserRound, UserPlus } from "lucide-react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 
 import Button from "../components/Button";
 import Card from "../components/Card";
 import { Input } from "../components/Input";
+import PixelIcon from "../components/PixelIcon";
 import ThemeToggle from "../components/ThemeToggle";
 import { useAuth } from "../context/AuthContext";
 
@@ -36,55 +36,61 @@ export default function Register() {
   }
 
   return (
-    <div className="premium-pattern min-h-screen text-[#F5F7FB] transition-colors">
+    <div className="premium-pattern min-h-screen text-[#F5F1EA] transition-colors">
       <div className="absolute right-4 top-4 z-10">
         <ThemeToggle />
       </div>
 
-      <main className="mx-auto grid min-h-screen w-full max-w-7xl gap-8 px-4 py-6 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:px-8">
-        <section className="chat-pattern relative hidden min-h-[calc(100vh-3rem)] overflow-hidden rounded-md border border-white/10 bg-[#11141B] p-8 text-white shadow-2xl shadow-black/35 lg:flex lg:flex-col lg:justify-between">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_22%_18%,rgba(231,111,81,0.24),transparent_34%),linear-gradient(135deg,rgba(255,255,255,0.08),transparent_40%)]" />
-          <div className="relative">
+      <main className="mx-auto grid min-h-screen w-full max-w-7xl gap-8 px-4 py-20 sm:px-6 lg:grid-cols-[1.08fr_0.92fr] lg:px-8 lg:py-6">
+        <section className="relative flex min-h-[44vh] flex-col justify-between overflow-hidden border border-white/10 bg-[#0B0B0A]/84 p-6 shadow-2xl shadow-black/35 lg:min-h-[calc(100vh-3rem)] lg:p-8">
+          <div className="pointer-events-none absolute inset-0 chat-pattern opacity-70" />
+          <div className="relative z-[1]">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-md bg-accent-500 text-white shadow-glow">
-                <ShieldCheck size={21} aria-hidden="true" />
+              <div className="flex h-11 w-11 items-center justify-center rounded-sm bg-accent-500 text-[#0B0B0A] shadow-glow">
+                <PixelIcon name="shield" size={28} />
               </div>
               <div>
-                <p className="text-sm font-semibold">ResolveX</p>
-                <p className="text-xs text-neutral-400">Customer support workspace</p>
+                <p className="display-type text-3xl leading-none">ResolveX</p>
+                <p className="text-[11px] font-black uppercase text-[#A7A29A]">Customer support</p>
               </div>
             </div>
 
-            <div className="mt-24 max-w-xl">
-              <p className="text-sm font-semibold uppercase text-accent-300">Customer registration</p>
-              <h1 className="mt-5 text-5xl font-semibold tracking-tight">Get support into one clear queue.</h1>
-              <p className="mt-5 max-w-lg text-base leading-7 text-neutral-300">
+            <div className="mt-16 max-w-2xl lg:mt-24">
+              <p className="eyebrow">Customer intake</p>
+              <h1 className="display-type mt-6 text-6xl leading-[0.88] text-[#F5F1EA] sm:text-7xl xl:text-8xl">
+                Open Clean.
+                <br />
+                Track Every Reply.
+                <br />
+                Resolve Fast.
+              </h1>
+              <p className="mt-6 max-w-xl text-base leading-7 text-[#A7A29A]">
                 Create a customer account, submit tickets, and keep the full conversation history attached to every issue.
               </p>
             </div>
           </div>
 
-          <div className="relative grid gap-3 sm:grid-cols-3">
+          <div className="relative z-[1] mt-10 grid gap-3 sm:grid-cols-3 lg:mt-0">
             {["Clear intake", "Priority context", "Conversation history"].map((item) => (
-              <div key={item} className="rounded-md border border-white/10 bg-white/[0.04] p-4">
-                <CheckCircle2 className="mb-3 text-accent-400" size={18} aria-hidden="true" />
-                <p className="text-sm font-medium text-white">{item}</p>
+              <div key={item} className="border border-white/10 bg-white/[0.04] p-4">
+                <PixelIcon className="mb-3 text-accent-400" name="check" size={20} />
+                <p className="text-xs font-black uppercase text-[#F5F1EA]">{item}</p>
               </div>
             ))}
           </div>
         </section>
 
-        <section className="flex min-h-[calc(100vh-3rem)] items-center justify-center py-14">
+        <section className="flex items-center justify-center lg:min-h-[calc(100vh-3rem)]">
           <div className="w-full max-w-md">
             <div className="mb-8">
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-md bg-accent-500 text-white shadow-glow lg:hidden">
-                <UserPlus size={24} aria-hidden="true" />
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-sm bg-accent-500 text-[#0B0B0A] shadow-glow lg:hidden">
+                <PixelIcon name="user" size={30} />
               </div>
-              <p className="text-sm font-semibold uppercase text-accent-400">Create account</p>
-              <h1 className="mt-3 text-3xl font-semibold tracking-tight text-neutral-950 dark:text-white">
+              <p className="eyebrow">Create account</p>
+              <h1 className="display-type mt-4 text-5xl leading-none text-[#F5F1EA]">
                 Join ResolveX as a customer
               </h1>
-              <p className="mt-2 text-sm leading-6 text-neutral-600 dark:text-neutral-400">
+              <p className="mt-3 text-sm leading-6 text-[#A7A29A]">
                 Customer accounts can create tickets and track support responses.
               </p>
             </div>
@@ -97,7 +103,7 @@ export default function Register() {
                       Full name
                     </label>
                     <div className="relative mt-2">
-                      <UserRound className="pointer-events-none absolute left-3 top-3 text-[#6F7A91]" size={18} />
+                      <PixelIcon className="pointer-events-none absolute left-3 top-2.5 text-[#726D66]" name="user" size={20} />
                       <Input
                         className="pl-10"
                         id="fullName"
@@ -113,7 +119,7 @@ export default function Register() {
                       Email
                     </label>
                     <div className="relative mt-2">
-                      <Mail className="pointer-events-none absolute left-3 top-3 text-[#6F7A91]" size={18} />
+                      <PixelIcon className="pointer-events-none absolute left-3 top-2.5 text-[#726D66]" name="mail" size={20} />
                       <Input
                         className="pl-10"
                         id="email"
@@ -137,7 +143,7 @@ export default function Register() {
                       onChange={(event) => setPassword(event.target.value)}
                       required
                     />
-                    <p className="mt-2 text-xs text-neutral-500 dark:text-neutral-400">Use at least 8 characters.</p>
+                    <p className="mt-2 text-xs text-[#A7A29A]">Use at least 8 characters.</p>
                   </div>
 
                   {error && (
@@ -148,11 +154,11 @@ export default function Register() {
 
                   <Button className="w-full" disabled={submitting} type="submit" variant="primary">
                     {submitting ? "Creating..." : "Register"}
-                    <ArrowRight size={18} aria-hidden="true" />
+                    <PixelIcon name="arrow" size={18} />
                   </Button>
                 </div>
 
-                <p className="mt-6 text-center text-sm text-neutral-600 dark:text-neutral-400">
+                <p className="mt-6 text-center text-sm text-[#A7A29A]">
                   Already registered?{" "}
                   <Link className="font-semibold text-accent-400 hover:text-accent-300" to="/login">
                     Login

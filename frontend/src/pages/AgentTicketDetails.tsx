@@ -1,5 +1,4 @@
 import { FormEvent, useEffect, useState } from "react";
-import { ArrowLeft, Inbox, Repeat2 } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 
 import { ticketApi } from "../api/ticketApi";
@@ -8,6 +7,7 @@ import Card from "../components/Card";
 import ChatThread from "../components/ChatThread";
 import EmptyState from "../components/EmptyState";
 import { Select, Textarea } from "../components/Input";
+import PixelIcon from "../components/PixelIcon";
 import TicketMetaSidebar from "../components/TicketMetaSidebar";
 import { useAuth } from "../context/AuthContext";
 import type { CommentAttachment, Ticket, TicketStatus } from "../types";
@@ -96,7 +96,7 @@ export default function AgentTicketDetails() {
   }
 
   if (loading) {
-    return <Card className="p-6 text-sm text-[#AAB3C5]">Loading ticket...</Card>;
+    return <Card className="p-6 text-sm text-[#A7A29A]">Loading ticket...</Card>;
   }
 
   if (!ticket) {
@@ -108,7 +108,6 @@ export default function AgentTicketDetails() {
           </Link>
         }
         description="This ticket may have been reassigned or removed."
-        icon={Inbox}
         title="Ticket not found"
       />
     );
@@ -119,14 +118,17 @@ export default function AgentTicketDetails() {
   return (
     <div className="space-y-5">
       <Link className={buttonClassName({ variant: "secondary" })} to="/agent/tickets">
-        <ArrowLeft size={18} aria-hidden="true" />
+        <PixelIcon className="rotate-180" name="arrow" size={18} />
         Back
       </Link>
 
       <div className="grid gap-5 xl:grid-cols-[360px_minmax(0,1fr)]">
         <TicketMetaSidebar customerLabel="Requester" ticket={ticket}>
-          <Card className="p-5">
-            <h2 className="text-base font-semibold text-[#F5F7FB]">Ticket controls</h2>
+          <Card className="p-4">
+            <div className="flex items-center gap-2 text-accent-400">
+              <PixelIcon name="settings" size={21} />
+              <h2 className="text-xs font-black uppercase text-[#F5F1EA]">Ticket controls</h2>
+            </div>
             <label className="label mt-4" htmlFor="status">
               Status
             </label>
@@ -137,14 +139,14 @@ export default function AgentTicketDetails() {
                 </option>
               ))}
             </Select>
-            {ticket.resolved_at && <p className="mt-3 text-xs text-[#AAB3C5]">Resolved {formatDateTime(ticket.resolved_at)}</p>}
+            {ticket.resolved_at && <p className="mt-3 text-xs text-[#A7A29A]">Resolved {formatDateTime(ticket.resolved_at)}</p>}
           </Card>
 
-          <Card className="p-5">
+          <Card className="p-4">
             <form onSubmit={handleReassignment}>
               <div className="flex items-center gap-2">
-                <Repeat2 className="text-accent-400" size={18} aria-hidden="true" />
-                <h2 className="text-base font-semibold text-[#F5F7FB]">Request reassignment</h2>
+                <PixelIcon className="text-accent-400" name="repeat" size={21} />
+                <h2 className="text-xs font-black uppercase text-[#F5F1EA]">Request reassignment</h2>
               </div>
               <Textarea
                 className="mt-4 min-h-28 resize-y"
@@ -155,7 +157,7 @@ export default function AgentTicketDetails() {
                 required
               />
               <Button className="mt-4 w-full" disabled={submittingRequest} type="submit">
-                <Repeat2 size={17} aria-hidden="true" />
+                <PixelIcon name="repeat" size={18} />
                 {submittingRequest ? "Sending..." : "Send request"}
               </Button>
             </form>
