@@ -50,7 +50,7 @@ export default function CreateTicket() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
+    <div className="space-y-5">
       <PageHeader
         description="Give the support team enough detail to reproduce the issue and prioritize the response."
         eyebrow="New Ticket"
@@ -58,7 +58,7 @@ export default function CreateTicket() {
       />
 
       <form onSubmit={handleSubmit}>
-        <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
+        <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px] 2xl:grid-cols-[minmax(0,1fr)_380px]">
           <Card className="p-6">
             <div className="space-y-6">
               <div>
@@ -168,7 +168,7 @@ export default function CreateTicket() {
               <p>Keep sensitive data out of the description unless support explicitly requests it.</p>
             </div>
             <div className="mt-5 rounded-md border border-neutral-200 bg-white p-3 text-xs text-neutral-500 dark:border-neutral-800 dark:bg-neutral-950/50 dark:text-neutral-400">
-              Selected: <span className="font-semibold text-neutral-800 dark:text-neutral-200">{category}</span> ·{" "}
+              Selected: <span className="font-semibold text-neutral-800 dark:text-neutral-200">{category}</span> -{" "}
               <span className="font-semibold text-neutral-800 dark:text-neutral-200">{priority}</span>
             </div>
           </Card>

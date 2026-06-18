@@ -10,12 +10,14 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
 
 if TYPE_CHECKING:
+    from app.models.assignment_request import TicketAssignmentRequest
     from app.models.comment import Comment
     from app.models.ticket import Ticket
 
 
 class UserRole(str, enum.Enum):
     CUSTOMER = "customer"
+    SUPPORT_AGENT = "support_agent"
     ADMIN = "admin"
 
 
@@ -23,9 +25,9 @@ class User(Base):
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
-    full_name: Mapped[str] = mapped_column(String(120), nullable=False)
+    full_name: Mapped[str] = mapped_column("name", String(120), nullable=False)
     email: Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)
-    hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
+    hashed_password: Mapped[str] = mapped_column("password_hash", String(255), nullable=False)
     role: Mapped[UserRole] = mapped_column(
         Enum(UserRole, values_callable=lambda values: [item.value for item in values], native_enum=False),
         default=UserRole.CUSTOMER,
@@ -33,6 +35,12 @@ class User(Base):
     )
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    )
 
     created_tickets: Mapped[list["Ticket"]] = relationship(
         "Ticket",
@@ -45,3 +53,12 @@ class User(Base):
         back_populates="assigned_to",
     )
     comments: Mapped[list["Comment"]] = relationship("Comment", back_populates="author")
+    reassignment_requests: Mapped[list["TicketAssignmentRequest"]] = relationship(
+        "TicketAssignmentRequest",
+        foreign_keys="TicketAssignmentRequest.requested_by_id",
+        back_populates="requested_by",
+    )
+
+    @property
+    def name(self) -> str:
+        return self.full_name

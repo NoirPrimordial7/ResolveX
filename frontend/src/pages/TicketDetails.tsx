@@ -30,7 +30,8 @@ export default function TicketDetails() {
   const [submitting, setSubmitting] = useState(false);
 
   const id = Number(ticketId);
-  const backHref = user?.role === "admin" ? "/admin/tickets" : "/dashboard";
+  const backHref =
+    user?.role === "admin" ? "/admin/tickets" : user?.role === "support_agent" ? "/agent/tickets" : "/customer/dashboard";
 
   async function loadTicket() {
     if (!id) return;

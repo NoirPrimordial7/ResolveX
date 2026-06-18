@@ -1,12 +1,12 @@
 # ResolveX - Customer Support Ticket Management System
 
-ResolveX is a full-stack customer support ticket management system built as a polished 2-day MVP. Resolve customer issues faster with customer ticket creation, admin assignment, status updates, comments, and dashboard reporting.
+ResolveX is a full-stack helpdesk system for customer support operations. Customers create tickets, admins assign and monitor work, and support agents work only on tickets assigned to them with comments, status updates, and reassignment requests.
 
 ## Tech Stack
 
 Backend:
 - FastAPI
-- Python 3.11+
+- Python 3.12.8 recommended for production
 - SQLAlchemy
 - PostgreSQL
 - Alembic
@@ -31,12 +31,13 @@ DevOps:
 ## Features
 
 - Customer registration and login.
-- Seeded admin login.
+- Production-safe admin and support-agent creation scripts.
 - JWT protected routes.
-- Role-based permissions.
+- Role-based permissions for `customer`, `support_agent`, and `admin`.
 - Customer ticket creation and comments.
-- Admin ticket search, filters, pagination, assignment, status updates, and priority updates.
-- Admin dashboard cards for total, open, in progress, resolved, and high priority tickets.
+- Support agent assigned ticket queue, replies, status updates, and reassignment requests.
+- Admin ticket search, filters, pagination, assignment, reassignment, status updates, and priority updates.
+- Admin dashboard cards, pending reassignment requests, and support agent workload.
 - Dark premium SaaS interface with orange accent and responsive layout.
 
 ## Folder Structure
@@ -81,7 +82,7 @@ resolvex/
 ## Backend Setup
 
 Requirements:
-- Python 3.11+
+- Python 3.12.8 recommended
 - PostgreSQL running locally or through Docker Compose
 
 From the project root:
@@ -166,6 +167,21 @@ email: customer@resolvex.com
 password: Customer@123
 ```
 
+Support Agent:
+
+```text
+email: agent@resolvex.com
+password: Agent@123
+```
+
+Seed credentials are for local development only. In production, create privileged users with environment variables:
+
+```bash
+cd backend
+ADMIN_NAME="ResolveX Admin" ADMIN_EMAIL="admin@example.com" ADMIN_PASSWORD="strong-password" python -m app.create_admin
+AGENT_NAME="Support Agent" AGENT_EMAIL="agent@example.com" AGENT_PASSWORD="strong-password" python -m app.create_agent
+```
+
 ## API Base URL
 
 ```text
@@ -176,11 +192,16 @@ http://localhost:8000/api
 
 - Login
 - Register
-- Customer Dashboard
+- Customer Dashboard at `/customer/dashboard`
 - Create Ticket
 - Ticket Details
+- Agent Dashboard
+- Agent Tickets
+- Agent Ticket Details
 - Admin Dashboard
 - Admin Tickets
+- Admin Agents
+- Admin Reassignment Requests
 
 ## Main API Endpoints
 
@@ -198,19 +219,55 @@ Customer tickets:
 Admin:
 - `GET /api/admin/tickets`
 - `GET /api/admin/dashboard`
+- `GET /api/admin/users`
+- `GET /api/admin/agents`
 - `PATCH /api/admin/tickets/{ticket_id}/status`
 - `PATCH /api/admin/tickets/{ticket_id}/assign`
+- `PATCH /api/admin/tickets/{ticket_id}/reassign`
 - `PATCH /api/admin/tickets/{ticket_id}/priority`
+- `GET /api/admin/reassignment-requests`
+- `PATCH /api/admin/reassignment-requests/{request_id}`
+
+Support agent:
+- `GET /api/agent/dashboard`
+- `GET /api/agent/tickets`
+- `GET /api/agent/tickets/{ticket_id}`
+- `PATCH /api/agent/tickets/{ticket_id}/status`
+- `POST /api/agent/tickets/{ticket_id}/comments`
+- `POST /api/agent/tickets/{ticket_id}/reassignment-requests`
 
 ## Production Command
 
-For production-style backend serving:
+Render backend:
 
 ```bash
-gunicorn -k uvicorn.workers.UvicornWorker app.main:app --bind 0.0.0.0:8000 --workers 4
+pip install -r requirements.txt
 ```
 
-Use a strong `SECRET_KEY`, HTTPS, managed PostgreSQL, backups, and proper logging in production.
+First deployment start command:
+
+```bash
+alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT
+```
+
+Normal production start command after the migration has run:
+
+```bash
+uvicorn app.main:app --host 0.0.0.0 --port $PORT
+```
+
+Set `PYTHON_VERSION=3.12.8` on Render or use `backend/.python-version`. Do not use Python 3.14 for production because some pinned binary database drivers may not publish compatible wheels yet.
+
+Supabase PostgreSQL:
+- Use the Supabase connection string as `DATABASE_URL`.
+- `postgresql://...` URLs are supported; SQLAlchemy driver dependencies include `psycopg2-binary==2.9.9` and `psycopg[binary]`.
+- Run `alembic upgrade head` before serving the app on the first deployment.
+
+Use a strong `SECRET_KEY`, HTTPS, managed PostgreSQL backups, and proper logging in production.
+
+## Postman
+
+Import `docs/ResolveX.postman_collection.json`. Update the collection variables for your admin, support-agent, and customer credentials, then run the collection in order.
 
 ## Future Improvements
 

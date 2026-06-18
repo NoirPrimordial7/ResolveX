@@ -18,6 +18,12 @@ SEED_USERS = [
         "password": "Customer@123",
         "role": UserRole.CUSTOMER,
     },
+    {
+        "full_name": "Demo Agent",
+        "email": "agent@resolvex.com",
+        "password": "Agent@123",
+        "role": UserRole.SUPPORT_AGENT,
+    },
 ]
 
 

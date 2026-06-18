@@ -1,0 +1,248 @@
+{
+  "info": {
+    "name": "ResolveX Helpdesk API",
+    "_postman_id": "a965c8d2-7b9d-45a5-9fd4-resolvex-helpdesk",
+    "description": "Production-style ResolveX customer, support agent, and admin API flow tests.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8000" },
+    { "key": "apiBase", "value": "{{baseUrl}}/api" },
+    { "key": "customerEmail", "value": "customer@resolvex.com" },
+    { "key": "customerPassword", "value": "Customer@123" },
+    { "key": "adminEmail", "value": "admin@resolvex.com" },
+    { "key": "adminPassword", "value": "Admin@123" },
+    { "key": "agentEmail", "value": "agent@resolvex.com" },
+    { "key": "agentPassword", "value": "Agent@123" },
+    { "key": "customerToken", "value": "" },
+    { "key": "adminToken", "value": "" },
+    { "key": "agentToken", "value": "" },
+    { "key": "ticketId", "value": "" },
+    { "key": "agentId", "value": "" },
+    { "key": "reassignmentRequestId", "value": "" },
+    { "key": "rejectionRequestId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "request": { "method": "GET", "url": "{{baseUrl}}/health" },
+      "event": [{ "listen": "test", "script": { "exec": ["pm.test('health ok', () => pm.response.to.have.status(200));"] } }]
+    },
+    {
+      "name": "OpenAPI",
+      "request": { "method": "GET", "url": "{{baseUrl}}/openapi.json" },
+      "event": [{ "listen": "test", "script": { "exec": ["pm.test('openapi ok', () => pm.response.to.have.status(200));"] } }]
+    },
+    {
+      "name": "Customer Login",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{apiBase}}/auth/login",
+        "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{customerEmail}}\",\n  \"password\": \"{{customerPassword}}\"\n}" }
+      },
+      "event": [{ "listen": "test", "script": { "exec": ["pm.test('customer login ok', () => pm.response.to.have.status(200));", "pm.collectionVariables.set('customerToken', pm.response.json().access_token);"] } }]
+    },
+    {
+      "name": "Admin Login",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{apiBase}}/auth/login",
+        "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}" }
+      },
+      "event": [{ "listen": "test", "script": { "exec": ["pm.test('admin login ok', () => pm.response.to.have.status(200));", "pm.collectionVariables.set('adminToken', pm.response.json().access_token);"] } }]
+    },
+    {
+      "name": "Agent Login",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{apiBase}}/auth/login",
+        "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{agentEmail}}\",\n  \"password\": \"{{agentPassword}}\"\n}" }
+      },
+      "event": [{ "listen": "test", "script": { "exec": ["pm.test('agent login ok', () => pm.response.to.have.status(200));", "pm.collectionVariables.set('agentToken', pm.response.json().access_token);"] } }]
+    },
+    {
+      "name": "Customer Create Ticket",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{customerToken}}" }
+        ],
+        "url": "{{apiBase}}/tickets",
+        "body": { "mode": "raw", "raw": "{\n  \"title\": \"Postman flow ticket\",\n  \"description\": \"Created by the ResolveX Postman collection.\",\n  \"category\": \"Technical\",\n  \"priority\": \"High\"\n}" }
+      },
+      "event": [{ "listen": "test", "script": { "exec": ["pm.test('ticket created', () => pm.response.to.have.status(201));", "pm.collectionVariables.set('ticketId', pm.response.json().id);"] } }]
+    },
+    {
+      "name": "Customer My Tickets",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{customerToken}}" }],
+        "url": "{{apiBase}}/tickets/my"
+      },
+      "event": [{ "listen": "test", "script": { "exec": ["pm.test('customer tickets ok', () => pm.response.to.have.status(200));"] } }]
+    },
+    {
+      "name": "Admin List Tickets",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+        "url": "{{apiBase}}/admin/tickets"
+      },
+      "event": [{ "listen": "test", "script": { "exec": ["pm.test('admin tickets ok', () => pm.response.to.have.status(200));"] } }]
+    },
+    {
+      "name": "Admin List Agents",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+        "url": "{{apiBase}}/admin/agents"
+      },
+      "event": [{ "listen": "test", "script": { "exec": ["pm.test('admin agents ok', () => pm.response.to.have.status(200));", "const agents = pm.response.json();", "pm.expect(agents.length).to.be.above(0);", "pm.collectionVariables.set('agentId', agents[0].id);"] } }]
+    },
+    {
+      "name": "Admin Assign Ticket",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+        ],
+        "url": "{{apiBase}}/admin/tickets/{{ticketId}}/assign",
+        "body": { "mode": "raw", "raw": "{\n  \"assigned_to_id\": {{agentId}}\n}" }
+      },
+      "event": [{ "listen": "test", "script": { "exec": ["pm.test('ticket assigned', () => pm.response.to.have.status(200));", "pm.expect(pm.response.json().assigned_to.role).to.eql('support_agent');"] } }]
+    },
+    {
+      "name": "Agent List Assigned Tickets",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{agentToken}}" }],
+        "url": "{{apiBase}}/agent/tickets"
+      },
+      "event": [{ "listen": "test", "script": { "exec": ["pm.test('agent tickets ok', () => pm.response.to.have.status(200));"] } }]
+    },
+    {
+      "name": "Agent Update Ticket Status",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{agentToken}}" }
+        ],
+        "url": "{{apiBase}}/agent/tickets/{{ticketId}}/status",
+        "body": { "mode": "raw", "raw": "{\n  \"status\": \"In Progress\"\n}" }
+      },
+      "event": [{ "listen": "test", "script": { "exec": ["pm.test('agent status update ok', () => pm.response.to.have.status(200));"] } }]
+    },
+    {
+      "name": "Agent Add Comment",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{agentToken}}" }
+        ],
+        "url": "{{apiBase}}/agent/tickets/{{ticketId}}/comments",
+        "body": { "mode": "raw", "raw": "{\n  \"message\": \"Agent update from Postman.\"\n}" }
+      },
+      "event": [{ "listen": "test", "script": { "exec": ["pm.test('agent comment ok', () => pm.response.to.have.status(201));"] } }]
+    },
+    {
+      "name": "Agent Request Reassignment",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{agentToken}}" }
+        ],
+        "url": "{{apiBase}}/agent/tickets/{{ticketId}}/reassignment-requests",
+        "body": { "mode": "raw", "raw": "{\n  \"reason\": \"Needs reassignment review from Postman.\"\n}" }
+      },
+      "event": [{ "listen": "test", "script": { "exec": ["pm.test('reassignment requested', () => pm.response.to.have.status(201));", "pm.collectionVariables.set('reassignmentRequestId', pm.response.json().id);"] } }]
+    },
+    {
+      "name": "Admin Reassignment Requests",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+        "url": "{{apiBase}}/admin/reassignment-requests"
+      },
+      "event": [{ "listen": "test", "script": { "exec": ["pm.test('admin reassignment list ok', () => pm.response.to.have.status(200));"] } }]
+    },
+    {
+      "name": "Admin Approve Reassignment",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+        ],
+        "url": "{{apiBase}}/admin/reassignment-requests/{{reassignmentRequestId}}",
+        "body": { "mode": "raw", "raw": "{\n  \"status\": \"Approved\",\n  \"assigned_to_id\": {{agentId}},\n  \"admin_response\": \"Approved from Postman.\"\n}" }
+      },
+      "event": [{ "listen": "test", "script": { "exec": ["pm.test('reassignment approved', () => pm.response.to.have.status(200));"] } }]
+    },
+    {
+      "name": "Agent Request Reassignment For Rejection",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{agentToken}}" }
+        ],
+        "url": "{{apiBase}}/agent/tickets/{{ticketId}}/reassignment-requests",
+        "body": { "mode": "raw", "raw": "{\n  \"reason\": \"Second request to verify rejection path.\"\n}" }
+      },
+      "event": [{ "listen": "test", "script": { "exec": ["pm.test('second reassignment requested', () => pm.response.to.have.status(201));", "pm.collectionVariables.set('rejectionRequestId', pm.response.json().id);"] } }]
+    },
+    {
+      "name": "Admin Reject Reassignment",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+        ],
+        "url": "{{apiBase}}/admin/reassignment-requests/{{rejectionRequestId}}",
+        "body": { "mode": "raw", "raw": "{\n  \"status\": \"Rejected\",\n  \"admin_response\": \"Rejected from Postman.\"\n}" }
+      },
+      "event": [{ "listen": "test", "script": { "exec": ["pm.test('reassignment rejected', () => pm.response.to.have.status(200));"] } }]
+    },
+    {
+      "name": "Security - Customer Cannot Access Admin",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{customerToken}}" }],
+        "url": "{{apiBase}}/admin/tickets"
+      },
+      "event": [{ "listen": "test", "script": { "exec": ["pm.test('customer blocked from admin', () => pm.response.to.have.status(403));"] } }]
+    },
+    {
+      "name": "Security - Customer Cannot Access Agent",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{customerToken}}" }],
+        "url": "{{apiBase}}/agent/tickets"
+      },
+      "event": [{ "listen": "test", "script": { "exec": ["pm.test('customer blocked from agent', () => pm.response.to.have.status(403));"] } }]
+    },
+    {
+      "name": "Security - Agent Cannot Access Admin",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{agentToken}}" }],
+        "url": "{{apiBase}}/admin/tickets"
+      },
+      "event": [{ "listen": "test", "script": { "exec": ["pm.test('agent blocked from admin', () => pm.response.to.have.status(403));"] } }]
+    },
+    {
+      "name": "Security - No Token Rejected",
+      "request": { "method": "GET", "url": "{{apiBase}}/admin/tickets" },
+      "event": [{ "listen": "test", "script": { "exec": ["pm.test('no token rejected', () => pm.response.to.have.status(401));"] } }]
+    }
+  ]
+}

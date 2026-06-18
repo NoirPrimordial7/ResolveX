@@ -10,7 +10,7 @@ import { Input, Select } from "../components/Input";
 import PageHeader from "../components/PageHeader";
 import PriorityBadge from "../components/PriorityBadge";
 import StatusBadge from "../components/StatusBadge";
-import type { Ticket, TicketCategory, TicketPriority, TicketStatus } from "../types";
+import type { AgentWorkload, Ticket, TicketCategory, TicketPriority, TicketStatus } from "../types";
 import { categories, priorities, statuses } from "../types";
 
 const pageSize = 8;
@@ -31,6 +31,8 @@ export default function AdminTickets() {
   const [status, setStatus] = useState<TicketStatus | "">("");
   const [priority, setPriority] = useState<TicketPriority | "">("");
   const [category, setCategory] = useState<TicketCategory | "">("");
+  const [assignedToId, setAssignedToId] = useState<number | "">("");
+  const [agents, setAgents] = useState<AgentWorkload[]>([]);
   const [loading, setLoading] = useState(true);
 
   const loadTickets = useCallback(async () => {
@@ -41,17 +43,22 @@ export default function AdminTickets() {
       search: search.trim() || undefined,
       status,
       priority,
-      category
+      category,
+      assigned_to_id: assignedToId
     };
     const data = await ticketApi.adminTickets(filters);
     setTickets(data.items);
     setTotal(data.total);
     setLoading(false);
-  }, [category, page, priority, search, status]);
+  }, [assignedToId, category, page, priority, search, status]);
 
   useEffect(() => {
     loadTickets();
   }, [loadTickets]);
+
+  useEffect(() => {
+    ticketApi.adminAgents().then(setAgents);
+  }, []);
 
   async function handleStatus(ticketId: number, nextStatus: TicketStatus) {
     await ticketApi.updateStatus(ticketId, nextStatus);
@@ -63,15 +70,16 @@ export default function AdminTickets() {
     await loadTickets();
   }
 
-  async function handleAssign(ticketId: number) {
-    await ticketApi.assignToSelf(ticketId);
+  async function handleAssign(ticketId: number, value: string) {
+    const nextAssignee = value ? Number(value) : null;
+    await ticketApi.assignTicket(ticketId, nextAssignee);
     await loadTickets();
   }
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <PageHeader
         action={
           <Button onClick={loadTickets} type="button" variant="secondary">
@@ -85,8 +93,8 @@ export default function AdminTickets() {
       />
 
       <Card className="p-4">
-        <div className="grid gap-3 xl:grid-cols-[1.4fr_repeat(3,1fr)]">
-          <div className="relative">
+        <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_150px_150px_170px_190px]">
+          <div className="relative min-w-0 flex-1">
             <Search className="pointer-events-none absolute left-3 top-3 text-neutral-400 dark:text-neutral-500" size={18} />
             <Input
               className="pl-10"
@@ -140,10 +148,24 @@ export default function AdminTickets() {
               </option>
             ))}
           </Select>
+          <Select
+            value={assignedToId}
+            onChange={(event) => {
+              setPage(1);
+              setAssignedToId(event.target.value ? Number(event.target.value) : "");
+            }}
+          >
+            <option value="">All assignees</option>
+            {agents.map((agent) => (
+              <option key={agent.id} value={agent.id}>
+                {agent.full_name}
+              </option>
+            ))}
+          </Select>
         </div>
       </Card>
 
-      <div className="grid gap-3 lg:hidden">
+      <div className="grid gap-3 xl:hidden">
         {loading ? (
           <Card className="p-5 text-sm text-neutral-600 dark:text-neutral-400">Loading tickets...</Card>
         ) : tickets.length === 0 ? (
@@ -203,38 +225,46 @@ export default function AdminTickets() {
                 <p className="truncate text-sm text-neutral-500 dark:text-neutral-400">
                   Assignee: <span className="font-medium text-neutral-800 dark:text-neutral-200">{ticket.assigned_to?.full_name || "Unassigned"}</span>
                 </p>
-                <Button className="shrink-0" onClick={() => handleAssign(ticket.id)} size="sm" type="button">
-                  <UserCheck size={15} aria-hidden="true" />
-                  Assign
-                </Button>
+                <Select
+                  className="shrink-0 py-2 text-xs sm:w-52"
+                  value={ticket.assigned_to?.id || ""}
+                  onChange={(event) => handleAssign(ticket.id, event.target.value)}
+                >
+                  <option value="">Unassigned</option>
+                  {agents.map((agent) => (
+                    <option key={agent.id} value={agent.id}>
+                      {agent.full_name}
+                    </option>
+                  ))}
+                </Select>
               </div>
             </Card>
           ))
         )}
       </div>
 
-      <Card className="hidden overflow-hidden lg:block">
+      <Card className="hidden overflow-hidden xl:block">
         <table className="w-full table-fixed text-left text-sm">
           <thead className="border-b border-neutral-200 bg-neutral-50 text-xs uppercase tracking-[0.14em] text-neutral-500 dark:border-neutral-800 dark:bg-neutral-950/70 dark:text-neutral-500">
             <tr>
-              <th className="w-[30%] px-4 py-4 font-semibold">Ticket</th>
-              <th className="w-[16%] px-4 py-4 font-semibold">Customer</th>
-              <th className="w-[14%] px-4 py-4 font-semibold">Status</th>
-              <th className="w-[14%] px-4 py-4 font-semibold">Priority</th>
-              <th className="w-[16%] px-4 py-4 font-semibold">Assignee</th>
-              <th className="w-[10%] px-4 py-4 font-semibold">Actions</th>
+              <th className="w-[30%] px-3 py-4 font-semibold">Ticket</th>
+              <th className="w-[15%] px-3 py-4 font-semibold">Customer</th>
+              <th className="w-[15%] px-3 py-4 font-semibold">Status</th>
+              <th className="w-[15%] px-3 py-4 font-semibold">Priority</th>
+              <th className="w-[15%] px-3 py-4 font-semibold">Assignee</th>
+              <th className="w-[10%] px-3 py-4 font-semibold">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-neutral-100 dark:divide-neutral-800">
             {loading ? (
               <tr>
-                <td className="px-4 py-10 text-neutral-600 dark:text-neutral-400" colSpan={6}>
+                <td className="px-3 py-10 text-neutral-600 dark:text-neutral-400" colSpan={6}>
                   Loading tickets...
                 </td>
               </tr>
             ) : tickets.length === 0 ? (
               <tr>
-                <td className="px-4 py-10" colSpan={6}>
+                <td className="px-3 py-10" colSpan={6}>
                   <div className="flex items-center gap-3 text-neutral-600 dark:text-neutral-400">
                     <Inbox size={20} aria-hidden="true" />
                     No tickets match the current filters.
@@ -244,16 +274,16 @@ export default function AdminTickets() {
             ) : (
               tickets.map((ticket) => (
                 <tr key={ticket.id} className="align-top transition hover:bg-neutral-50 dark:hover:bg-neutral-900/70">
-                  <td className="px-4 py-4">
+                  <td className="px-3 py-4">
                     <p className="truncate font-semibold text-neutral-950 dark:text-white">{ticket.title}</p>
                     <p className="mt-1 truncate text-xs text-neutral-500 dark:text-neutral-400">
-                      {ticket.category} · {formatDate(ticket.created_at)}
+                      {ticket.category} - {formatDate(ticket.created_at)}
                     </p>
                   </td>
-                  <td className="px-4 py-4">
+                  <td className="px-3 py-4">
                     <p className="truncate text-neutral-700 dark:text-neutral-300">{ticket.created_by.full_name}</p>
                   </td>
-                  <td className="px-4 py-4">
+                  <td className="px-3 py-4">
                     <div className="mb-2">
                       <StatusBadge value={ticket.status} />
                     </div>
@@ -265,7 +295,7 @@ export default function AdminTickets() {
                       ))}
                     </Select>
                   </td>
-                  <td className="px-4 py-4">
+                  <td className="px-3 py-4">
                     <div className="mb-2">
                       <PriorityBadge value={ticket.priority} />
                     </div>
@@ -281,15 +311,26 @@ export default function AdminTickets() {
                       ))}
                     </Select>
                   </td>
-                  <td className="px-4 py-4">
+                  <td className="px-3 py-4">
                     <p className="mb-2 truncate text-neutral-700 dark:text-neutral-300">{ticket.assigned_to?.full_name || "Unassigned"}</p>
-                    <Button className="px-3" onClick={() => handleAssign(ticket.id)} size="sm" type="button">
-                      <UserCheck size={15} aria-hidden="true" />
-                      Assign
-                    </Button>
+                    <div className="relative">
+                      <UserCheck className="pointer-events-none absolute left-2.5 top-2.5 text-neutral-400" size={14} aria-hidden="true" />
+                      <Select
+                        className="py-2 pl-8 text-xs"
+                        value={ticket.assigned_to?.id || ""}
+                        onChange={(event) => handleAssign(ticket.id, event.target.value)}
+                      >
+                        <option value="">Unassigned</option>
+                        {agents.map((agent) => (
+                          <option key={agent.id} value={agent.id}>
+                            {agent.full_name}
+                          </option>
+                        ))}
+                      </Select>
+                    </div>
                   </td>
-                  <td className="px-4 py-4">
-                    <Link className={buttonClassName({ className: "px-3", size: "sm", variant: "secondary" })} to={`/tickets/${ticket.id}`}>
+                  <td className="px-3 py-4">
+                    <Link className={buttonClassName({ className: "px-2.5", size: "sm", variant: "secondary" })} to={`/tickets/${ticket.id}`}>
                       <Eye size={15} aria-hidden="true" />
                       View
                     </Link>
@@ -303,14 +344,14 @@ export default function AdminTickets() {
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-neutral-500 dark:text-neutral-400">
-          Page {page} of {totalPages} · {total} tickets
+          Page {page} of {totalPages} - {total} tickets
         </p>
-        <div className="flex gap-2">
-          <Button disabled={page <= 1} onClick={() => setPage((value) => value - 1)} type="button">
+        <div className="grid grid-cols-2 gap-2 sm:flex">
+          <Button className="w-full sm:w-auto" disabled={page <= 1} onClick={() => setPage((value) => value - 1)} type="button">
             <ChevronLeft size={16} aria-hidden="true" />
             Previous
           </Button>
-          <Button disabled={page >= totalPages} onClick={() => setPage((value) => value + 1)} type="button">
+          <Button className="w-full sm:w-auto" disabled={page >= totalPages} onClick={() => setPage((value) => value + 1)} type="button">
             Next
             <ChevronRight size={16} aria-hidden="true" />
           </Button>

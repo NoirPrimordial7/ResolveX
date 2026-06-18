@@ -12,13 +12,16 @@ Authentication uses a JWT bearer token:
 Authorization: Bearer <access_token>
 ```
 
+Roles:
+- `customer`
+- `support_agent`
+- `admin`
+
 ## Auth
 
 ### POST `/auth/register`
 
-Access: Public customer registration.
-
-Request:
+Public customer registration only. Admins and support agents are created with server-side scripts.
 
 ```json
 {
@@ -28,24 +31,7 @@ Request:
 }
 ```
 
-Response:
-
-```json
-{
-  "id": 2,
-  "full_name": "Demo Customer",
-  "email": "customer@example.com",
-  "role": "customer",
-  "is_active": true,
-  "created_at": "2026-06-17T10:00:00Z"
-}
-```
-
 ### POST `/auth/login`
-
-Access: Public.
-
-Request:
 
 ```json
 {
@@ -54,39 +40,15 @@ Request:
 }
 ```
 
-Response:
-
-```json
-{
-  "access_token": "jwt-token-here",
-  "token_type": "bearer"
-}
-```
-
 ### GET `/auth/me`
 
-Access: Authenticated users.
+Returns the current user, including `role`, `name`, `full_name`, `created_at`, and `updated_at`.
 
-Response:
-
-```json
-{
-  "id": 1,
-  "full_name": "ResolveX Admin",
-  "email": "admin@resolvex.com",
-  "role": "admin",
-  "is_active": true,
-  "created_at": "2026-06-17T10:00:00Z"
-}
-```
-
-## Customer Tickets
+## Customer
 
 ### POST `/tickets`
 
-Access: Customer only.
-
-Request:
+Access: customer only. Tickets start as `Open` and are auto-assigned to the active support agent with the fewest active tickets when an agent exists.
 
 ```json
 {
@@ -97,56 +59,20 @@ Request:
 }
 ```
 
-Response: ticket details with creator, optional assignee, and comments.
-
 ### GET `/tickets/my`
 
-Access: Customer only.
+Access: customer only.
 
-Query params:
-- `status`: optional. Open, In Progress, Resolved, or Closed.
-
-Response:
-
-```json
-[
-  {
-    "id": 1,
-    "title": "Payment failed",
-    "description": "My payment was deducted but the invoice still shows unpaid.",
-    "category": "Billing",
-    "priority": "High",
-    "status": "Open",
-    "created_by": {
-      "id": 2,
-      "full_name": "Demo Customer",
-      "email": "customer@resolvex.com",
-      "role": "customer",
-      "is_active": true,
-      "created_at": "2026-06-17T10:00:00Z"
-    },
-    "assigned_to": null,
-    "created_at": "2026-06-17T10:00:00Z",
-    "updated_at": "2026-06-17T10:00:00Z"
-  }
-]
-```
+Query:
+- `status`: optional Open, In Progress, Resolved, or Closed.
 
 ### GET `/tickets/{ticket_id}`
 
-Access:
-- Customer can access own tickets only.
-- Admin can access all tickets.
-
-Response: ticket details with comments.
+Access: customer who created the ticket, assigned support agent, or admin.
 
 ### POST `/tickets/{ticket_id}/comments`
 
-Access:
-- Customer can comment on own tickets only.
-- Admin can comment on any ticket.
-
-Request:
+Access: customer who created the ticket, assigned support agent, or admin.
 
 ```json
 {
@@ -154,73 +80,34 @@ Request:
 }
 ```
 
-Response:
+## Support Agent
 
-```json
-{
-  "id": 1,
-  "message": "Please check this as soon as possible.",
-  "created_at": "2026-06-17T10:15:00Z",
-  "author": {
-    "id": 2,
-    "full_name": "Demo Customer",
-    "email": "customer@resolvex.com",
-    "role": "customer",
-    "is_active": true,
-    "created_at": "2026-06-17T10:00:00Z"
-  }
-}
-```
+### GET `/agent/dashboard`
 
-## Admin
+Access: support agent only.
 
-### GET `/admin/dashboard`
+Returns assigned, open assigned, in-progress assigned, resolved counts, and recent assigned tickets.
 
-Access: Admin only.
+### GET `/agent/tickets`
 
-Response:
+Access: support agent only.
 
-```json
-{
-  "stats": {
-    "total_tickets": 10,
-    "open_tickets": 4,
-    "in_progress_tickets": 3,
-    "resolved_tickets": 2,
-    "high_priority_tickets": 1
-  },
-  "recent_tickets": []
-}
-```
+Query:
+- `status`
+- `priority`
+- `category`
 
-### GET `/admin/tickets`
+### GET `/agent/tickets/{ticket_id}`
 
-Access: Admin only.
+Access: assigned support agent only.
 
-Query params:
-- `page`: default 1.
-- `page_size`: default 10, max 100.
-- `search`: optional title or description search.
-- `status`: optional status.
-- `priority`: optional priority.
-- `category`: optional category.
+### PATCH `/agent/tickets/{ticket_id}/status`
 
-Response:
+Access: assigned support agent only.
 
-```json
-{
-  "items": [],
-  "total": 0,
-  "page": 1,
-  "page_size": 10
-}
-```
-
-### PATCH `/admin/tickets/{ticket_id}/status`
-
-Access: Admin only.
-
-Request:
+Allowed status transitions for agents:
+- `In Progress`
+- `Resolved`
 
 ```json
 {
@@ -228,29 +115,74 @@ Request:
 }
 ```
 
-Response: updated ticket.
+### POST `/agent/tickets/{ticket_id}/comments`
 
-### PATCH `/admin/tickets/{ticket_id}/assign`
+Access: assigned support agent only.
 
-Access: Admin only.
+### POST `/agent/tickets/{ticket_id}/reassignment-requests`
 
-Request:
+Access: assigned support agent only.
 
 ```json
 {
-  "assigned_to_id": null
+  "reason": "This ticket requires a billing specialist."
 }
 ```
 
-If `assigned_to_id` is null or omitted, the ticket is assigned to the current admin.
+## Admin
 
-Response: updated ticket.
+### GET `/admin/dashboard`
+
+Access: admin only.
+
+Returns ticket stats, recent tickets, pending reassignment count, unassigned tickets, and agent workload.
+
+### GET `/admin/tickets`
+
+Access: admin only.
+
+Query:
+- `page`
+- `page_size`
+- `search`
+- `status`
+- `priority`
+- `category`
+- `assigned_to_id`
+
+### GET `/admin/users`
+
+Access: admin only. Returns all users.
+
+### GET `/admin/agents`
+
+Access: admin only. Returns support agents with active, open, in-progress, and resolved ticket counts.
+
+### PATCH `/admin/tickets/{ticket_id}/assign`
+
+Access: admin only. Assigns or unassigns a ticket.
+
+```json
+{
+  "assigned_to_id": 3
+}
+```
+
+Use `null` to leave the ticket unassigned.
+
+### PATCH `/admin/tickets/{ticket_id}/reassign`
+
+Access: admin only. Requires a support agent id.
+
+```json
+{
+  "assigned_to_id": 4
+}
+```
 
 ### PATCH `/admin/tickets/{ticket_id}/priority`
 
-Access: Admin only.
-
-Request:
+Access: admin only.
 
 ```json
 {
@@ -258,7 +190,39 @@ Request:
 }
 ```
 
-Response: updated ticket.
+### PATCH `/admin/tickets/{ticket_id}/status`
+
+Access: admin only. Admin can set Open, In Progress, Resolved, or Closed.
+
+### GET `/admin/reassignment-requests`
+
+Access: admin only.
+
+Query:
+- `status`: optional Pending, Approved, or Rejected.
+
+### PATCH `/admin/reassignment-requests/{request_id}`
+
+Access: admin only.
+
+Approve:
+
+```json
+{
+  "status": "Approved",
+  "assigned_to_id": 4,
+  "admin_response": "Reassigned to billing support."
+}
+```
+
+Reject:
+
+```json
+{
+  "status": "Rejected",
+  "admin_response": "Current agent should continue handling this ticket."
+}
+```
 
 ## Error Format
 

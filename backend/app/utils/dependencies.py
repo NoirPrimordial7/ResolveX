@@ -56,3 +56,9 @@ def require_customer(current_user: User = Depends(get_current_user)) -> User:
     if current_user.role != UserRole.CUSTOMER:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Customer access required")
     return current_user
+
+
+def require_support_agent(current_user: User = Depends(get_current_user)) -> User:
+    if current_user.role != UserRole.SUPPORT_AGENT:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Support agent access required")
+    return current_user

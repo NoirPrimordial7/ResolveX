@@ -10,8 +10,15 @@ import { useAuth } from "../context/AuthContext";
 
 const demoAccounts = [
   { label: "Admin", email: "admin@resolvex.com", password: "Admin@123" },
+  { label: "Agent", email: "agent@resolvex.com", password: "Agent@123" },
   { label: "Customer", email: "customer@resolvex.com", password: "Customer@123" }
 ];
+
+function defaultRouteForRole(role: string) {
+  if (role === "admin") return "/admin/dashboard";
+  if (role === "support_agent") return "/agent/dashboard";
+  return "/customer/dashboard";
+}
 
 export default function Login() {
   const { login, user } = useAuth();
@@ -22,7 +29,7 @@ export default function Login() {
   const [submitting, setSubmitting] = useState(false);
 
   if (user) {
-    return <Navigate to={user.role === "admin" ? "/admin/dashboard" : "/dashboard"} replace />;
+    return <Navigate to={defaultRouteForRole(user.role)} replace />;
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -31,7 +38,7 @@ export default function Login() {
     setSubmitting(true);
     try {
       const currentUser = await login({ email, password });
-      navigate(currentUser.role === "admin" ? "/admin/dashboard" : "/dashboard", { replace: true });
+      navigate(defaultRouteForRole(currentUser.role), { replace: true });
     } catch {
       setError("Invalid email or password.");
     } finally {

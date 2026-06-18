@@ -4,6 +4,13 @@ from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
+def normalize_database_url(url: str) -> str:
+    """Normalize provider URLs into SQLAlchemy-compatible database URLs."""
+    if url.startswith("postgres://"):
+        return f"postgresql://{url.removeprefix('postgres://')}"
+    return url
+
+
 class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
 
