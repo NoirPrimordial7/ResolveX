@@ -1,5 +1,4 @@
 import { FormEvent, useState } from "react";
-import { AlertTriangle, Layers, MessageSquareText, Send } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 import { ticketApi } from "../api/ticketApi";
@@ -7,6 +6,7 @@ import Button from "../components/Button";
 import Card from "../components/Card";
 import { Input, Textarea } from "../components/Input";
 import PageHeader from "../components/PageHeader";
+import PixelIcon from "../components/PixelIcon";
 import type { TicketCategory, TicketPriority } from "../types";
 import { categories, priorities } from "../types";
 import { cn } from "../utils/cn";
@@ -65,7 +65,7 @@ export default function CreateTicket() {
                 <label className="label" htmlFor="title">
                   Ticket title
                 </label>
-                <p className="mt-1 text-sm text-[#AAB3C5]">Use a short summary of the issue or request.</p>
+                <p className="mt-1 text-sm text-[#A7A29A]">Use a short summary of the issue or request.</p>
                 <Input
                   className="mt-2"
                   id="title"
@@ -82,7 +82,7 @@ export default function CreateTicket() {
                 <label className="label" htmlFor="description">
                   Description
                 </label>
-                <p className="mt-1 text-sm text-[#AAB3C5]">
+                <p className="mt-1 text-sm text-[#A7A29A]">
                   Include steps taken, expected behavior, screenshots context, or affected users.
                 </p>
                 <Textarea
@@ -98,24 +98,24 @@ export default function CreateTicket() {
 
               <div>
                 <div className="flex items-center gap-2">
-                  <Layers className="text-accent-400" size={18} aria-hidden="true" />
-                  <h2 className="text-sm font-semibold text-[#F5F7FB]">Category</h2>
+                  <PixelIcon className="text-accent-400" name="list" size={20} />
+                  <h2 className="text-xs font-black uppercase text-[#F5F1EA]">Category</h2>
                 </div>
                 <div className="mt-3 grid gap-3 sm:grid-cols-2">
                   {categories.map((item) => (
                     <button
                       key={item}
                       className={cn(
-                        "rounded-md border p-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/25",
+                        "rounded-sm border p-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/25",
                         category === item
                           ? "border-accent-500/35 bg-accent-500/10 text-accent-100"
-                          : "border-white/10 bg-white/[0.03] text-[#DCE3F2] hover:border-white/20 hover:bg-white/[0.06]"
+                          : "border-white/10 bg-white/[0.03] text-[#F5F1EA] hover:border-white/20 hover:bg-white/[0.06]"
                       )}
                       onClick={() => setCategory(item)}
                       type="button"
                     >
                       <span className="block text-sm font-semibold">{item}</span>
-                      <span className="mt-1 block text-xs leading-5 text-[#AAB3C5]">{categoryDescriptions[item]}</span>
+                      <span className="mt-1 block text-xs leading-5 text-[#A7A29A]">{categoryDescriptions[item]}</span>
                     </button>
                   ))}
                 </div>
@@ -123,53 +123,53 @@ export default function CreateTicket() {
 
               <div>
                 <div className="flex items-center gap-2">
-                  <AlertTriangle className="text-accent-400" size={18} aria-hidden="true" />
-                  <h2 className="text-sm font-semibold text-[#F5F7FB]">Priority</h2>
+                  <PixelIcon className="text-accent-400" name="alert" size={20} />
+                  <h2 className="text-xs font-black uppercase text-[#F5F1EA]">Priority</h2>
                 </div>
                 <div className="mt-3 grid gap-3 sm:grid-cols-2">
                   {priorities.map((item) => (
                     <button
                       key={item}
                       className={cn(
-                        "rounded-md border p-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/25",
+                        "rounded-sm border p-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/25",
                         priority === item
                           ? "border-accent-500/35 bg-accent-500/10 text-accent-100"
-                          : "border-white/10 bg-white/[0.03] text-[#DCE3F2] hover:border-white/20 hover:bg-white/[0.06]"
+                          : "border-white/10 bg-white/[0.03] text-[#F5F1EA] hover:border-white/20 hover:bg-white/[0.06]"
                       )}
                       onClick={() => setPriority(item)}
                       type="button"
                     >
                       <span className="block text-sm font-semibold">{item}</span>
-                      <span className="mt-1 block text-xs leading-5 text-[#AAB3C5]">{priorityDescriptions[item]}</span>
+                      <span className="mt-1 block text-xs leading-5 text-[#A7A29A]">{priorityDescriptions[item]}</span>
                     </button>
                   ))}
                 </div>
               </div>
 
               {error && (
-                <p className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-500/25 dark:bg-red-500/10 dark:text-red-300">
+                <p className="rounded-sm border border-red-500/25 bg-red-500/10 p-3 text-sm text-red-200">
                   {error}
                 </p>
               )}
 
               <Button className="w-full sm:w-auto" disabled={submitting} type="submit" variant="primary">
-                <Send size={18} aria-hidden="true" />
+                <PixelIcon name="send" size={18} />
                 {submitting ? "Submitting..." : "Submit Ticket"}
               </Button>
             </div>
           </Card>
 
-          <Card className="h-fit bg-[#11141B]/92 p-5">
-            <MessageSquareText className="text-accent-400" size={22} aria-hidden="true" />
-            <h2 className="mt-4 text-base font-semibold text-[#F5F7FB]">Helpful ticket details</h2>
-            <div className="mt-4 space-y-4 text-sm leading-6 text-[#AAB3C5]">
+          <Card className="h-fit bg-[#111111]/92 p-5">
+            <PixelIcon className="text-accent-400" name="chat" size={26} />
+            <h2 className="display-type mt-4 text-3xl leading-none text-[#F5F1EA]">Helpful ticket details</h2>
+            <div className="mt-4 space-y-4 text-sm leading-6 text-[#A7A29A]">
               <p>Include the exact page, account, or workflow where the issue happens.</p>
               <p>Mention whether this blocks work for one user, many users, or an entire team.</p>
               <p>Keep sensitive data out of the description unless support explicitly requests it.</p>
             </div>
-            <div className="mt-5 rounded-md border border-white/10 bg-white/[0.04] p-3 text-xs text-[#AAB3C5]">
-              Selected: <span className="font-semibold text-[#F5F7FB]">{category}</span> -{" "}
-              <span className="font-semibold text-[#F5F7FB]">{priority}</span>
+            <div className="mt-5 rounded-sm border border-white/10 bg-white/[0.04] p-3 text-xs text-[#A7A29A]">
+              Selected: <span className="font-black uppercase text-[#F5F1EA]">{category}</span> -{" "}
+              <span className="font-black uppercase text-[#F5F1EA]">{priority}</span>
             </div>
           </Card>
         </div>

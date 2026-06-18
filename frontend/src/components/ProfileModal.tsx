@@ -1,12 +1,12 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
-import { Camera, KeyRound, Save, Trash2, X } from "lucide-react";
 
 import { useAuth } from "../context/AuthContext";
 import { cn } from "../utils/cn";
 import Avatar from "./Avatar";
 import Button from "./Button";
 import { Input } from "./Input";
+import PixelIcon from "./PixelIcon";
 
 const maxAvatarBytes = 1_500_000;
 
@@ -36,6 +36,31 @@ export default function ProfileModal({ onClose, open }: ProfileModalProps) {
   const [profileError, setProfileError] = useState("");
   const [passwordNotice, setPasswordNotice] = useState("");
   const [passwordError, setPasswordError] = useState("");
+
+  useEffect(() => {
+    if (!open || !user) return;
+    setFullName(user.full_name || "");
+    setAvatarUrl(user.avatar_url || null);
+    setCurrentPassword("");
+    setNewPassword("");
+    setProfileNotice("");
+    setProfileError("");
+    setPasswordNotice("");
+    setPasswordError("");
+  }, [open, user?.id]);
+
+  useEffect(() => {
+    if (!open) return;
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [onClose, open]);
 
   const previewUser = useMemo(
     () =>
@@ -107,52 +132,66 @@ export default function ProfileModal({ onClose, open }: ProfileModalProps) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm" role="presentation">
+    <div
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/76 p-0 backdrop-blur-md sm:items-center sm:p-4"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) {
+          onClose();
+        }
+      }}
+      role="presentation"
+    >
       <section
         aria-modal="true"
         aria-labelledby="profile-title"
-        className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-md border border-white/10 bg-[#11141B] shadow-2xl shadow-black/45"
+        className="max-h-[92vh] w-full overflow-y-auto rounded-t-sm border border-white/10 bg-[#111111] shadow-2xl shadow-black/55 sm:max-h-[85vh] sm:max-w-3xl sm:rounded-sm"
         role="dialog"
       >
-        <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-white/10 bg-[#11141B]/95 px-5 py-4 backdrop-blur-xl">
+        <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-white/10 bg-[#111111]/95 px-5 py-4 backdrop-blur-xl">
           <div>
-            <p className="text-xs font-semibold uppercase text-accent-400">Account</p>
-            <h2 id="profile-title" className="mt-1 text-lg font-semibold text-[#F5F7FB]">
+            <p className="eyebrow">Account</p>
+            <h2 id="profile-title" className="display-type mt-3 text-4xl leading-none text-[#F5F1EA]">
               Profile settings
             </h2>
           </div>
           <button
             aria-label="Close profile settings"
-            className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-white/10 text-[#AAB3C5] transition hover:bg-white/5 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/40"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-sm border border-white/10 text-[#A7A29A] transition hover:border-accent-500/45 hover:bg-accent-500/10 hover:text-[#F5F1EA] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/40"
             onClick={onClose}
             type="button"
           >
-            <X size={18} aria-hidden="true" />
+            <PixelIcon name="close" size={22} />
           </button>
         </div>
 
-        <div className="grid gap-5 p-5 lg:grid-cols-[220px_minmax(0,1fr)]">
-          <aside className="rounded-md border border-white/10 bg-white/[0.03] p-4">
+        <div className="grid gap-5 p-5 lg:grid-cols-[240px_minmax(0,1fr)]">
+          <aside className="border border-white/10 bg-white/[0.03] p-4">
             <div className="flex flex-col items-center text-center">
-              <Avatar className="ring-4 ring-accent-500/10" size="xl" user={previewUser} />
-              <p className="mt-4 max-w-full truncate text-sm font-semibold text-[#F5F7FB]">{fullName}</p>
-              <p className="mt-1 max-w-full truncate text-xs text-[#AAB3C5]">{user.email}</p>
+              <Avatar className="h-24 w-24 text-3xl ring-4 ring-accent-500/10" size="xl" user={previewUser} />
+              <p className="mt-4 max-w-full truncate text-xs font-black uppercase text-[#F5F1EA]">{fullName}</p>
+              <p className="mt-1 max-w-full truncate text-xs text-[#A7A29A]">{user.email}</p>
             </div>
 
-            <label className="mt-5 flex h-10 cursor-pointer items-center justify-center gap-2 rounded-md bg-accent-500 px-3 text-sm font-semibold text-white shadow-lg shadow-accent-600/20 transition hover:bg-accent-400">
-              <Camera size={16} aria-hidden="true" />
+            <label className="mt-5 flex h-10 cursor-pointer items-center justify-center gap-2 rounded-sm bg-accent-500 px-3 text-xs font-black uppercase text-[#0B0B0A] shadow-glow transition hover:bg-accent-400">
+              <PixelIcon name="camera" size={18} />
               Upload photo
               <input accept="image/*" className="sr-only" onChange={handleAvatarChange} type="file" />
             </label>
             <Button className="mt-2 w-full" onClick={() => setAvatarUrl(null)} type="button" variant="secondary">
-              <Trash2 size={16} aria-hidden="true" />
+              <PixelIcon name="trash" size={18} />
               Remove
             </Button>
-            <p className="mt-3 text-xs leading-5 text-[#AAB3C5]">Images are stored as compact profile data URLs for this workspace.</p>
+            <p className="mt-3 border-t border-white/10 pt-3 text-xs leading-5 text-[#A7A29A]">
+              Images are stored as compact profile data URLs for this workspace.
+            </p>
           </aside>
 
           <div className="space-y-5">
-            <form className="rounded-md border border-white/10 bg-white/[0.03] p-4" onSubmit={handleProfileSubmit}>
+            <form className="border border-white/10 bg-white/[0.03] p-4" onSubmit={handleProfileSubmit}>
+              <div className="mb-4 flex items-center gap-2 text-accent-400">
+                <PixelIcon name="user" size={22} />
+                <h3 className="text-xs font-black uppercase text-[#F5F1EA]">Account details</h3>
+              </div>
               <label className="label" htmlFor="profile-name">
                 Display name
               </label>
@@ -167,9 +206,9 @@ export default function ProfileModal({ onClose, open }: ProfileModalProps) {
               />
 
               {(profileError || profileNotice) && (
-                <p
-                  className={cn(
-                    "mt-3 rounded-md border p-3 text-sm",
+                  <p
+                    className={cn(
+                    "mt-3 rounded-sm border p-3 text-sm",
                     profileError
                       ? "border-red-500/25 bg-red-500/10 text-red-200"
                       : "border-emerald-500/25 bg-emerald-500/10 text-emerald-200"
@@ -179,16 +218,21 @@ export default function ProfileModal({ onClose, open }: ProfileModalProps) {
                 </p>
               )}
 
-              <Button className="mt-4" disabled={savingProfile} type="submit" variant="primary">
-                <Save size={17} aria-hidden="true" />
-                {savingProfile ? "Saving..." : "Save profile"}
-              </Button>
+              <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+                <Button disabled={savingProfile} type="submit" variant="primary">
+                  <PixelIcon name="check" size={18} />
+                  {savingProfile ? "Saving..." : "Save profile"}
+                </Button>
+                <Button onClick={onClose} type="button" variant="secondary">
+                  Cancel
+                </Button>
+              </div>
             </form>
 
-            <form className="rounded-md border border-white/10 bg-white/[0.03] p-4" onSubmit={handlePasswordSubmit}>
+            <form className="border border-white/10 bg-white/[0.03] p-4" onSubmit={handlePasswordSubmit}>
               <div className="flex items-center gap-2">
-                <KeyRound className="text-accent-400" size={18} aria-hidden="true" />
-                <h3 className="text-sm font-semibold text-[#F5F7FB]">Change password</h3>
+                <PixelIcon className="text-accent-400" name="key" size={22} />
+                <h3 className="text-xs font-black uppercase text-[#F5F1EA]">Password</h3>
               </div>
 
               <div className="mt-4 grid gap-4 sm:grid-cols-2">
@@ -222,9 +266,9 @@ export default function ProfileModal({ onClose, open }: ProfileModalProps) {
               </div>
 
               {(passwordError || passwordNotice) && (
-                <p
-                  className={cn(
-                    "mt-3 rounded-md border p-3 text-sm",
+                  <p
+                    className={cn(
+                    "mt-3 rounded-sm border p-3 text-sm",
                     passwordError
                       ? "border-red-500/25 bg-red-500/10 text-red-200"
                       : "border-emerald-500/25 bg-emerald-500/10 text-emerald-200"
@@ -235,10 +279,20 @@ export default function ProfileModal({ onClose, open }: ProfileModalProps) {
               )}
 
               <Button className="mt-4" disabled={savingPassword} type="submit" variant="secondary">
-                <KeyRound size={17} aria-hidden="true" />
+                <PixelIcon name="key" size={18} />
                 {savingPassword ? "Updating..." : "Update password"}
               </Button>
             </form>
+
+            <div className="border border-white/10 bg-[#0B0B0A]/75 p-4">
+              <div className="flex items-center gap-2 text-accent-400">
+                <PixelIcon name="command" size={22} />
+                <h3 className="text-xs font-black uppercase text-[#F5F1EA]">Actions</h3>
+              </div>
+              <p className="mt-2 text-sm leading-6 text-[#A7A29A]">
+                Save account changes independently from password updates. Use cancel or the backdrop to leave settings.
+              </p>
+            </div>
           </div>
         </div>
       </section>

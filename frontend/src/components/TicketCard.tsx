@@ -1,8 +1,8 @@
-import { CalendarDays, UserRound } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import type { Ticket } from "../types";
 import Avatar from "./Avatar";
+import PixelIcon from "./PixelIcon";
 import PriorityBadge from "./PriorityBadge";
 import StatusBadge from "./StatusBadge";
 
@@ -21,15 +21,18 @@ export default function TicketCard({ ticket, to }: TicketCardProps) {
   return (
     <Link
       to={to || `/tickets/${ticket.id}`}
-      className="panel-card group block p-5 transition hover:-translate-y-0.5 hover:border-accent-500/40 hover:shadow-glow"
+      className="panel-card pixel-frame group block p-5 transition hover:-translate-y-0.5 hover:border-accent-500/45 hover:shadow-glow"
     >
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
-          <p className="text-xs font-semibold uppercase text-accent-400">{ticket.category}</p>
-          <h3 className="mt-2 line-clamp-2 text-lg font-semibold text-[#F5F7FB] transition-colors group-hover:text-accent-300">
+          <p className="flex items-center gap-2 text-[11px] font-black uppercase text-accent-400">
+            <PixelIcon name="ticket" size={18} />
+            {ticket.category}
+          </p>
+          <h3 className="mt-3 line-clamp-2 text-lg font-black uppercase text-[#F5F1EA] transition-colors group-hover:text-accent-300">
             {ticket.title}
           </h3>
-          <p className="mt-2 line-clamp-2 text-sm leading-6 text-[#AAB3C5]">{ticket.description}</p>
+          <p className="mt-2 line-clamp-2 text-sm leading-6 text-[#A7A29A]">{ticket.description}</p>
         </div>
         <div className="flex shrink-0 flex-wrap gap-2">
           <StatusBadge value={ticket.status} />
@@ -37,13 +40,13 @@ export default function TicketCard({ ticket, to }: TicketCardProps) {
         </div>
       </div>
 
-      <div className="mt-5 flex flex-wrap items-center gap-4 border-t border-white/10 pt-4 text-sm text-[#AAB3C5]">
+      <div className="mt-5 flex flex-wrap items-center gap-4 border-t border-white/10 pt-4 text-sm text-[#A7A29A]">
         <span className="inline-flex items-center gap-2">
-          <CalendarDays size={16} aria-hidden="true" />
+          <PixelIcon name="calendar" size={18} />
           {createdDate}
         </span>
         <span className="inline-flex items-center gap-2">
-          {ticket.assigned_to ? <Avatar size="sm" user={ticket.assigned_to} /> : <UserRound size={16} aria-hidden="true" />}
+          {ticket.assigned_to ? <Avatar size="sm" user={ticket.assigned_to} /> : <PixelIcon name="user" size={18} />}
           <span>{ticket.assigned_to ? ticket.assigned_to.full_name : "Unassigned"}</span>
         </span>
       </div>

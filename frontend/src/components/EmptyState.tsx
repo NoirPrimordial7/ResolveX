@@ -1,23 +1,23 @@
-import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 
 import Card from "./Card";
+import PixelIcon from "./PixelIcon";
 
 interface EmptyStateProps {
-  icon: LucideIcon;
+  icon?: unknown;
   title: string;
   description: string;
   action?: ReactNode;
 }
 
-export default function EmptyState({ action, description, icon: Icon, title }: EmptyStateProps) {
+export default function EmptyState({ action, description, title }: EmptyStateProps) {
   return (
     <Card className="p-8 text-center">
-      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-accent-500/25 bg-accent-500/10 text-accent-300 shadow-glow">
-        <Icon size={22} aria-hidden="true" />
+      <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-sm border border-accent-500/35 bg-accent-500/10 text-accent-300 shadow-glow">
+        <PixelIcon name="inbox" size={34} />
       </div>
-      <h3 className="mt-4 text-base font-semibold text-[#F5F7FB] dark:text-white">{title}</h3>
-      <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[#AAB3C5] dark:text-[#AAB3C5]">{description}</p>
+      <h3 className="display-type mt-5 text-3xl leading-none text-[#F5F1EA] dark:text-[#F5F1EA]">{title}</h3>
+      <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-[#A7A29A] dark:text-[#A7A29A]">{description}</p>
       {action && <div className="mt-5 flex justify-center">{action}</div>}
     </Card>
   );

@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from "react";
-import { Eye, Inbox, RotateCcw, Search } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import { ticketApi, type AgentTicketFilters } from "../api/ticketApi";
@@ -9,6 +8,7 @@ import Card from "../components/Card";
 import EmptyState from "../components/EmptyState";
 import { Input, Select } from "../components/Input";
 import PageHeader from "../components/PageHeader";
+import PixelIcon from "../components/PixelIcon";
 import PriorityBadge from "../components/PriorityBadge";
 import StatusBadge from "../components/StatusBadge";
 import TicketCard from "../components/TicketCard";
@@ -55,7 +55,7 @@ export default function AgentTickets() {
       <PageHeader
         action={
           <Button onClick={loadTickets} type="button" variant="secondary">
-            <RotateCcw size={17} aria-hidden="true" />
+            <PixelIcon name="refresh" size={18} />
             Refresh
           </Button>
         }
@@ -67,7 +67,7 @@ export default function AgentTickets() {
       <Card className="p-4">
         <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_180px_180px_200px]">
           <div className="relative min-w-0">
-            <Search className="pointer-events-none absolute left-3 top-3 text-[#6F7A91]" size={18} />
+            <PixelIcon className="pointer-events-none absolute left-3 top-2.5 text-[#726D66]" name="search" size={20} />
             <Input
               className="pl-10"
               placeholder="Search assigned tickets"
@@ -103,11 +103,10 @@ export default function AgentTickets() {
       </Card>
 
       {loading ? (
-        <Card className="p-5 text-sm text-[#AAB3C5]">Loading assigned tickets...</Card>
+        <Card className="p-5 text-sm text-[#A7A29A]">Loading assigned tickets...</Card>
       ) : visibleTickets.length === 0 ? (
         <EmptyState
           description="Assigned tickets that match your filters will appear here."
-          icon={Inbox}
           title="No assigned tickets found"
         />
       ) : (
@@ -120,8 +119,8 @@ export default function AgentTickets() {
                     <p className="text-xs font-semibold uppercase text-accent-400">
                       {ticket.category}
                     </p>
-                    <h2 className="mt-2 line-clamp-2 text-base font-semibold text-[#F5F7FB]">{ticket.title}</h2>
-                    <p className="mt-1 flex min-w-0 items-center gap-2 truncate text-sm text-[#AAB3C5]">
+                    <h2 className="mt-2 line-clamp-2 text-base font-black uppercase text-[#F5F1EA]">{ticket.title}</h2>
+                    <p className="mt-1 flex min-w-0 items-center gap-2 truncate text-sm text-[#A7A29A]">
                       <Avatar size="sm" user={ticket.created_by} />
                       <span className="truncate">{ticket.created_by.full_name}</span>
                     </p>
@@ -130,7 +129,7 @@ export default function AgentTickets() {
                     className={buttonClassName({ className: "shrink-0 px-3", size: "sm", variant: "secondary" })}
                     to={`/agent/tickets/${ticket.id}`}
                   >
-                    <Eye size={15} aria-hidden="true" />
+                    <PixelIcon name="eye" size={16} />
                     View
                   </Link>
                 </div>
@@ -156,7 +155,7 @@ export default function AgentTickets() {
             ))}
           </div>
 
-          <div className="hidden grid-cols-2 gap-4 xl:grid">
+          <div className="hidden grid-cols-2 gap-4 xl:grid 2xl:grid-cols-3">
             {visibleTickets.map((ticket) => (
               <TicketCard key={ticket.id} ticket={ticket} to={`/agent/tickets/${ticket.id}`} />
             ))}

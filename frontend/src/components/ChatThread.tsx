@@ -1,23 +1,13 @@
 import { useMemo, useRef, useState } from "react";
 import type { ChangeEvent, FormEvent, KeyboardEvent } from "react";
-import {
-  ChevronDown,
-  FileText,
-  Image as ImageIcon,
-  MessageSquareText,
-  Paperclip,
-  Send,
-  Smile,
-  Sparkles,
-  X
-} from "lucide-react";
 
 import type { Comment, CommentAttachment, User } from "../types";
 import { cn } from "../utils/cn";
 import Avatar from "./Avatar";
 import Button from "./Button";
+import PixelIcon from "./PixelIcon";
 
-const emojis = ["🙂", "😊", "👍", "🙏", "✅", "🔥", "🎯", "📎", "💬", "✨", "🚀", "❤️"];
+const emojis = [":)", ":D", "OK", "++", "DONE", "FIX", "PIN", "NOTE", "SHIP", "FAST", "THANKS", "CLEAR"];
 const maxAttachments = 4;
 const maxAttachmentBytes = 1_500_000;
 
@@ -102,14 +92,17 @@ function AttachmentTile({ attachment, mine }: { attachment: CommentAttachment; m
   if (isImage) {
     return (
       <a
-        className="group mt-2 block overflow-hidden rounded-md border border-white/10 bg-black/20"
+        className={cn(
+          "group mt-2 block overflow-hidden rounded-sm border",
+          mine ? "border-black/15 bg-black/10" : "border-white/10 bg-black/20"
+        )}
         href={attachment.url || undefined}
         rel="noreferrer"
         target="_blank"
       >
         <img alt={attachment.name} className="max-h-56 w-full object-cover transition group-hover:scale-[1.01]" src={attachment.url || ""} />
-        <span className="flex items-center gap-2 px-3 py-2 text-xs text-[#DCE3F2]">
-          <ImageIcon size={14} aria-hidden="true" />
+        <span className={cn("flex items-center gap-2 px-3 py-2 text-xs", mine ? "text-[#0B0B0A]" : "text-[#F5F1EA]")}>
+          <PixelIcon name="image" size={15} />
           <span className="truncate">{attachment.name}</span>
         </span>
       </a>
@@ -119,21 +112,21 @@ function AttachmentTile({ attachment, mine }: { attachment: CommentAttachment; m
   return (
     <a
       className={cn(
-        "mt-2 flex items-center gap-3 rounded-md border px-3 py-2 text-left text-xs transition",
+        "mt-2 flex items-center gap-3 rounded-sm border px-3 py-2 text-left text-xs transition",
         mine
-          ? "border-white/15 bg-white/10 text-white hover:bg-white/15"
-          : "border-white/10 bg-white/[0.04] text-[#DCE3F2] hover:bg-white/[0.07]"
+          ? "border-black/15 bg-black/10 text-[#0B0B0A] hover:bg-black/15"
+          : "border-white/10 bg-white/[0.04] text-[#F5F1EA] hover:bg-white/[0.07]"
       )}
       download={attachment.name}
       href={attachment.url || undefined}
       rel="noreferrer"
       target={attachment.url ? "_blank" : undefined}
     >
-      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-accent-500/15 text-accent-300">
-        <FileText size={16} aria-hidden="true" />
+      <span className={cn("flex h-8 w-8 shrink-0 items-center justify-center rounded-sm", mine ? "bg-black/10" : "bg-accent-500/15 text-accent-300")}>
+        <PixelIcon name="file" size={18} />
       </span>
       <span className="min-w-0">
-        <span className="block truncate font-semibold">{attachment.name}</span>
+        <span className="block truncate font-black uppercase">{attachment.name}</span>
         <span className="mt-0.5 block text-[11px] opacity-75">{formatFileSize(attachment.size)}</span>
       </span>
     </a>
@@ -238,15 +231,15 @@ export default function ChatThread({
   }
 
   return (
-    <section className="flex min-h-[620px] flex-col overflow-hidden rounded-md border border-white/10 bg-[#11141B]/92 shadow-2xl shadow-black/20">
-      <div className="flex flex-col gap-3 border-b border-white/10 bg-[#171B23]/80 px-4 py-4 backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between">
+    <section className="flex min-h-[calc(100vh-8rem)] flex-col overflow-hidden rounded-sm border border-white/10 bg-[#111111]/94 shadow-2xl shadow-black/30">
+      <div className="sticky top-0 z-10 flex flex-col gap-3 border-b border-white/10 bg-[#171717]/95 px-4 py-4 backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
-          <p className="text-xs font-semibold uppercase text-accent-400">Chat thread</p>
-          <h2 className="mt-1 truncate text-lg font-semibold text-[#F5F7FB]">{title}</h2>
-          <p className="mt-1 text-sm text-[#AAB3C5]">{subtitle}</p>
+          <p className="eyebrow">Chat thread</p>
+          <h2 className="display-type mt-3 truncate text-4xl leading-none text-[#F5F1EA]">{title}</h2>
+          <p className="mt-2 text-sm text-[#A7A29A]">{subtitle}</p>
         </div>
-        <div className="inline-flex items-center gap-2 self-start rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-semibold text-[#DCE3F2] sm:self-auto">
-          <MessageSquareText size={14} aria-hidden="true" />
+        <div className="inline-flex items-center gap-2 self-start rounded-sm border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-black uppercase text-[#F5F1EA] sm:self-auto">
+          <PixelIcon name="chat" size={17} />
           {comments.length} {comments.length === 1 ? "message" : "messages"}
         </div>
       </div>
@@ -254,12 +247,12 @@ export default function ChatThread({
       <div className="chat-pattern min-h-0 flex-1 overflow-y-auto px-3 py-5 sm:px-5">
         {normalizedComments.length === 0 ? (
           <div className="flex min-h-[360px] items-center justify-center text-center">
-            <div className="max-w-sm rounded-md border border-white/10 bg-[#171B23]/80 p-6 shadow-xl shadow-black/15 backdrop-blur">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-accent-500/25 bg-accent-500/10 text-accent-300">
-                <MessageSquareText size={24} aria-hidden="true" />
+            <div className="max-w-sm border border-white/10 bg-[#171717]/88 p-6 shadow-xl shadow-black/20 backdrop-blur">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-sm border border-accent-500/35 bg-accent-500/10 text-accent-300">
+                <PixelIcon name="chat" size={36} />
               </div>
-              <h3 className="mt-4 text-base font-semibold text-[#F5F7FB]">No messages yet</h3>
-              <p className="mt-2 text-sm leading-6 text-[#AAB3C5]">Start the chat with context, screenshots, or the next support step.</p>
+              <h3 className="display-type mt-5 text-3xl leading-none text-[#F5F1EA]">No messages yet</h3>
+              <p className="mt-3 text-sm leading-6 text-[#A7A29A]">Start the chat with context, screenshots, or the next support step.</p>
             </div>
           </div>
         ) : (
@@ -278,7 +271,7 @@ export default function ChatThread({
                 <div key={comment.id}>
                   {showDate && (
                     <div className="sticky top-0 z-[1] my-4 flex justify-center">
-                      <span className="rounded-full border border-white/10 bg-[#0B0D12]/85 px-3 py-1 text-xs font-semibold text-[#AAB3C5] shadow-lg shadow-black/20 backdrop-blur">
+                      <span className="rounded-sm border border-white/10 bg-[#0B0B0A]/88 px-3 py-1 text-xs font-black uppercase text-[#A7A29A] shadow-lg shadow-black/20 backdrop-blur">
                         {formatDay(comment.created_at)}
                       </span>
                     </div>
@@ -286,23 +279,23 @@ export default function ChatThread({
 
                   <div className={cn("flex gap-2 py-1", mine ? "justify-end" : "justify-start", grouped && !showDate ? "mt-0.5" : "mt-3")}>
                     {!mine && <div className="w-9">{!grouped && <Avatar size="sm" user={comment.author} />}</div>}
-                    <div className={cn("max-w-[88%] sm:max-w-[76%] xl:max-w-[68%]", mine ? "items-end" : "items-start")}>
+                    <div className={cn("max-w-[85%] sm:max-w-[72%] xl:max-w-[60%]", mine ? "items-end" : "items-start")}>
                       {!grouped && (
                         <div className={cn("mb-1 flex items-center gap-2 px-1", mine ? "justify-end" : "justify-start")}>
-                          <span className="max-w-44 truncate text-xs font-semibold capitalize text-[#DCE3F2]">
+                          <span className="max-w-44 truncate text-xs font-black uppercase text-[#F5F1EA]">
                             {mine ? "You" : comment.author.full_name}
                           </span>
-                          <span className="text-[11px] capitalize text-[#AAB3C5]">{roleLabel(comment.author.role)}</span>
-                          <span className="text-[11px] text-[#7F8AA3]">{formatTime(comment.created_at)}</span>
+                          <span className="text-[11px] capitalize text-[#A7A29A]">{roleLabel(comment.author.role)}</span>
+                          <span className="text-[11px] text-[#726D66]">{formatTime(comment.created_at)}</span>
                         </div>
                       )}
 
                       <div
                         className={cn(
-                          "rounded-md px-3.5 py-2.5 text-sm leading-6 shadow-lg",
+                          "rounded-sm px-3.5 py-2.5 text-sm leading-6 shadow-lg",
                           mine
-                            ? "rounded-br-sm bg-[linear-gradient(135deg,#E76F51,#C7512E)] text-white shadow-accent-600/20"
-                            : "rounded-bl-sm border border-white/10 bg-[#171B23]/95 text-[#F5F7FB] shadow-black/15"
+                            ? "bg-[linear-gradient(135deg,#FF4B24,#D93618)] text-[#0B0B0A] shadow-accent-600/20"
+                            : "border border-white/10 bg-[#171717]/96 text-[#F5F1EA] shadow-black/15"
                         )}
                       >
                         {comment.message && <p className="whitespace-pre-wrap break-words">{comment.message}</p>}
@@ -320,32 +313,32 @@ export default function ChatThread({
         )}
       </div>
 
-      <form className="sticky bottom-0 border-t border-white/10 bg-[#11141B]/95 p-3 backdrop-blur-xl sm:p-4" onSubmit={handleSubmit}>
+      <form className="sticky bottom-0 border-t border-white/10 bg-[#111111]/96 p-3 backdrop-blur-xl sm:p-4" onSubmit={handleSubmit}>
         {canUseQuickReplies && quickOpen && (
-          <div className="mb-3 max-h-72 overflow-y-auto rounded-md border border-white/10 bg-[#171B23] p-3 shadow-2xl shadow-black/25">
+          <div className="mb-3 max-h-72 overflow-y-auto rounded-sm border border-white/10 bg-[#171717] p-3 shadow-2xl shadow-black/30">
             <div className="mb-3 flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2 text-sm font-semibold text-[#F5F7FB]">
-                <Sparkles className="text-accent-400" size={17} aria-hidden="true" />
+              <div className="flex items-center gap-2 text-xs font-black uppercase text-[#F5F1EA]">
+                <PixelIcon className="text-accent-400" name="spark" size={19} />
                 Quick replies
               </div>
               <button
                 aria-label="Close quick replies"
-                className="text-[#AAB3C5] transition hover:text-white"
+                className="text-[#A7A29A] transition hover:text-[#F5F1EA]"
                 onClick={() => setQuickOpen(false)}
                 type="button"
               >
-                <X size={17} aria-hidden="true" />
+                <PixelIcon name="close" size={18} />
               </button>
             </div>
             <div className="grid gap-3 md:grid-cols-3">
               {quickResponseCategories.map((category) => (
                 <div key={category.name}>
-                  <p className="mb-2 text-xs font-semibold uppercase text-[#AAB3C5]">{category.name}</p>
+                  <p className="mb-2 text-[11px] font-black uppercase text-[#A7A29A]">{category.name}</p>
                   <div className="space-y-2">
                     {category.responses.map((response) => (
                       <button
                         key={response}
-                        className="w-full rounded-md border border-white/10 bg-white/[0.03] p-3 text-left text-xs leading-5 text-[#DCE3F2] transition hover:border-accent-500/40 hover:bg-accent-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/35"
+                        className="w-full rounded-sm border border-white/10 bg-white/[0.03] p-3 text-left text-xs leading-5 text-[#F5F1EA] transition hover:border-accent-500/45 hover:bg-accent-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/35"
                         onClick={() => insertQuickResponse(response)}
                         type="button"
                       >
@@ -360,16 +353,15 @@ export default function ChatThread({
         )}
 
         {emojiOpen && (
-          <div className="mb-3 flex flex-wrap gap-2 rounded-md border border-white/10 bg-[#171B23] p-3 shadow-2xl shadow-black/25">
+          <div className="mb-3 flex flex-wrap gap-2 rounded-sm border border-white/10 bg-[#171717] p-3 shadow-2xl shadow-black/30">
             {emojis.map((emoji) => (
               <button
                 key={emoji}
-                className="flex h-9 w-9 items-center justify-center rounded-md text-lg transition hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/35"
+                className="flex h-9 min-w-9 items-center justify-center rounded-sm border border-white/10 px-2 font-mono text-xs text-[#F5F1EA] transition hover:border-accent-500/45 hover:bg-accent-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/35"
                 onClick={() => insertText(emoji)}
                 type="button"
               >
-                <span aria-hidden="true">{emoji}</span>
-                <span className="sr-only">Insert emoji</span>
+                {emoji}
               </button>
             ))}
           </div>
@@ -380,17 +372,17 @@ export default function ChatThread({
             {attachments.map((attachment) => (
               <span
                 key={attachment.id}
-                className="inline-flex max-w-full items-center gap-2 rounded-full border border-white/10 bg-white/[0.05] px-3 py-1.5 text-xs text-[#DCE3F2]"
+                className="inline-flex max-w-full items-center gap-2 rounded-sm border border-white/10 bg-white/[0.05] px-3 py-1.5 text-xs text-[#F5F1EA]"
               >
-                {attachment.type.startsWith("image/") ? <ImageIcon size={14} aria-hidden="true" /> : <FileText size={14} aria-hidden="true" />}
+                <PixelIcon name={attachment.type.startsWith("image/") ? "image" : "file"} size={15} />
                 <span className="max-w-40 truncate">{attachment.name}</span>
                 <button
                   aria-label={`Remove ${attachment.name}`}
-                  className="text-[#AAB3C5] transition hover:text-white"
+                  className="text-[#A7A29A] transition hover:text-[#F5F1EA]"
                   onClick={() => setAttachments((current) => current.filter((item) => item.id !== attachment.id))}
                   type="button"
                 >
-                  <X size={14} aria-hidden="true" />
+                  <PixelIcon name="close" size={14} />
                 </button>
               </span>
             ))}
@@ -398,46 +390,46 @@ export default function ChatThread({
         )}
 
         {(error || attachmentError) && (
-          <p className="mb-3 rounded-md border border-red-500/25 bg-red-500/10 p-3 text-sm text-red-200">{error || attachmentError}</p>
+          <p className="mb-3 rounded-sm border border-red-500/25 bg-red-500/10 p-3 text-sm text-red-200">{error || attachmentError}</p>
         )}
 
-        <div className="flex items-end gap-2 rounded-md border border-white/10 bg-[#0B0D12]/85 p-2 shadow-inner shadow-black/30">
+        <div className="flex items-end gap-2 rounded-sm border border-white/10 bg-[#0B0B0A]/88 p-2 shadow-inner shadow-black/30">
           <input className="sr-only" multiple onChange={handleFiles} ref={fileInputRef} type="file" />
           <button
             aria-label="Attach files"
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md text-[#AAB3C5] transition hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/35"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-sm text-[#A7A29A] transition hover:bg-white/10 hover:text-[#F5F1EA] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/35"
             onClick={() => fileInputRef.current?.click()}
             type="button"
           >
-            <Paperclip size={19} aria-hidden="true" />
+            <PixelIcon name="attach" size={21} />
           </button>
 
           <button
             aria-expanded={emojiOpen}
             aria-label="Open emoji picker"
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md text-[#AAB3C5] transition hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/35"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-sm text-[#A7A29A] transition hover:bg-white/10 hover:text-[#F5F1EA] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/35"
             onClick={() => setEmojiOpen((current) => !current)}
             type="button"
           >
-            <Smile size={19} aria-hidden="true" />
+            <PixelIcon name="emoji" size={21} />
           </button>
 
           {canUseQuickReplies && (
             <button
               aria-expanded={quickOpen}
-              className="hidden h-10 shrink-0 items-center gap-2 rounded-md px-3 text-xs font-semibold text-[#DCE3F2] transition hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/35 sm:inline-flex"
+              className="hidden h-10 shrink-0 items-center gap-2 rounded-sm px-3 text-xs font-black uppercase text-[#F5F1EA] transition hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/35 sm:inline-flex"
               onClick={() => setQuickOpen((current) => !current)}
               type="button"
             >
-              <Sparkles size={16} aria-hidden="true" />
+              <PixelIcon name="spark" size={17} />
               Quick replies
-              <ChevronDown className={cn("transition", quickOpen && "rotate-180")} size={15} aria-hidden="true" />
+              <PixelIcon className={cn("transition", quickOpen && "rotate-90")} name="arrow" size={15} />
             </button>
           )}
 
           <textarea
             aria-label="Type your message"
-            className="max-h-36 min-h-10 flex-1 resize-none border-0 bg-transparent px-1 py-2 text-sm leading-6 text-[#F5F7FB] outline-none placeholder:text-[#6F7A91]"
+            className="max-h-36 min-h-10 flex-1 resize-none border-0 bg-transparent px-1 py-2 text-sm leading-6 text-[#F5F1EA] outline-none placeholder:text-[#726D66]"
             onChange={(event) => setMessage(event.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Message this ticket..."
@@ -449,16 +441,16 @@ export default function ChatThread({
             <button
               aria-expanded={quickOpen}
               aria-label="Open quick replies"
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md text-[#AAB3C5] transition hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/35 sm:hidden"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-sm text-[#A7A29A] transition hover:bg-white/10 hover:text-[#F5F1EA] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/35 sm:hidden"
               onClick={() => setQuickOpen((current) => !current)}
               type="button"
             >
-              <Sparkles size={18} aria-hidden="true" />
+              <PixelIcon name="spark" size={20} />
             </button>
           )}
 
-          <Button className="h-10 w-10 shrink-0 rounded-md px-0" disabled={!hasContent || submitting} type="submit" variant="primary">
-            <Send size={18} aria-hidden="true" />
+          <Button className="h-10 w-10 shrink-0 rounded-sm px-0" disabled={!hasContent || submitting} type="submit" variant="primary">
+            <PixelIcon name="send" size={20} />
             <span className="sr-only">{submitting ? "Sending" : "Send message"}</span>
           </Button>
         </div>

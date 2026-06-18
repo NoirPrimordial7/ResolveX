@@ -34,7 +34,7 @@ export default function Avatar({ className, label, size = "md", user }: AvatarPr
   return (
     <span
       className={cn(
-        "inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-[linear-gradient(135deg,rgba(231,111,81,0.95),rgba(199,81,46,0.88))] font-semibold text-white shadow-lg shadow-accent-600/15",
+        "inline-flex shrink-0 items-center justify-center overflow-hidden rounded-sm border border-accent-500/35 bg-[linear-gradient(135deg,#FF4B24,#D93618)] font-black uppercase text-[#0B0B0A] shadow-glow",
         sizeClasses[size],
         className
       )}
