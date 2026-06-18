@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
+import { createPortal } from "react-dom";
 
 import { useAuth } from "../context/AuthContext";
 import { cn } from "../utils/cn";
@@ -52,6 +53,17 @@ export default function ProfileModal({ onClose, open }: ProfileModalProps) {
   useEffect(() => {
     if (!open) return;
 
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
         onClose();
@@ -75,6 +87,7 @@ export default function ProfileModal({ onClose, open }: ProfileModalProps) {
   );
 
   if (!open || !user) return null;
+  if (typeof document === "undefined") return null;
 
   async function handleAvatarChange(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -131,20 +144,17 @@ export default function ProfileModal({ onClose, open }: ProfileModalProps) {
     }
   }
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/76 p-0 backdrop-blur-md sm:items-center sm:p-4"
-      onMouseDown={(event) => {
-        if (event.target === event.currentTarget) {
-          onClose();
-        }
-      }}
+      className="fixed inset-0 z-[9999] grid place-items-center overflow-y-auto bg-black/75 p-2 backdrop-blur-sm sm:p-4"
+      onClick={onClose}
       role="presentation"
     >
       <section
         aria-modal="true"
         aria-labelledby="profile-title"
-        className="max-h-[92vh] w-full overflow-y-auto rounded-t-sm border border-white/10 bg-[#111111] shadow-2xl shadow-black/55 sm:max-h-[85vh] sm:max-w-3xl sm:rounded-sm"
+        className="max-h-[calc(100dvh-1rem)] min-h-[calc(100dvh-1rem)] w-full max-w-4xl overflow-y-auto rounded-none border border-white/10 bg-[#111111] shadow-2xl shadow-black/55 sm:min-h-0 sm:max-h-[calc(100vh-2rem)] sm:rounded-sm"
+        onClick={(event) => event.stopPropagation()}
         role="dialog"
       >
         <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-white/10 bg-[#111111]/95 px-5 py-4 backdrop-blur-xl">
@@ -296,6 +306,7 @@ export default function ProfileModal({ onClose, open }: ProfileModalProps) {
           </div>
         </div>
       </section>
-    </div>
+    </div>,
+    document.body
   );
 }
