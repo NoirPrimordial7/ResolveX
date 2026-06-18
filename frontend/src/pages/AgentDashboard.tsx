@@ -19,7 +19,7 @@ export default function AgentDashboard() {
   }, []);
 
   if (!dashboard) {
-    return <Card className="p-6 text-sm text-neutral-600 dark:text-neutral-400">Loading dashboard...</Card>;
+    return <Card className="p-6 text-sm text-[#AAB3C5]">Loading dashboard...</Card>;
   }
 
   return (
@@ -72,8 +72,8 @@ export default function AgentDashboard() {
 
       <section className="space-y-4">
         <div>
-          <h2 className="text-lg font-semibold text-neutral-950 dark:text-white">Recent Assigned Tickets</h2>
-          <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
+          <h2 className="text-lg font-semibold text-[#F5F7FB]">Recent Assigned Tickets</h2>
+          <p className="mt-1 text-sm text-[#AAB3C5]">
             Newest updates in your assigned workload.
           </p>
         </div>
@@ -82,7 +82,7 @@ export default function AgentDashboard() {
           <EmptyState
             description="Tickets assigned by an admin will appear here."
             icon={Inbox}
-            title="No assigned tickets"
+            title="You're all caught up"
           />
         ) : (
           <div className="grid gap-4 2xl:grid-cols-2">

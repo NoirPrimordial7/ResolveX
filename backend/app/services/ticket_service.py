@@ -1,3 +1,4 @@
+import json
 from datetime import datetime, timezone
 
 from fastapi import HTTPException, status
@@ -58,6 +59,7 @@ def get_agent_workload(db: Session) -> list[dict[str, int | str]]:
             "name": agent.full_name,
             "full_name": agent.full_name,
             "email": agent.email,
+            "avatar_url": agent.avatar_url,
             "active_ticket_count": _ticket_count_for_agent(db, agent.id, ACTIVE_STATUSES),
             "open_ticket_count": _ticket_count_for_agent(db, agent.id, (TicketStatus.OPEN,)),
             "in_progress_ticket_count": _ticket_count_for_agent(db, agent.id, (TicketStatus.IN_PROGRESS,)),
@@ -175,7 +177,13 @@ def get_agent_dashboard(db: Session, current_user: User) -> tuple[dict[str, int]
 
 
 def add_comment(db: Session, ticket: Ticket, payload: CommentCreate, current_user: User) -> Comment:
-    comment = Comment(message=payload.message.strip(), ticket_id=ticket.id, author_id=current_user.id)
+    attachments = [attachment.model_dump() for attachment in payload.attachments]
+    comment = Comment(
+        message=payload.message.strip(),
+        attachments_json=json.dumps(attachments) if attachments else None,
+        ticket_id=ticket.id,
+        author_id=current_user.id,
+    )
     db.add(comment)
     db.commit()
     db.refresh(comment)

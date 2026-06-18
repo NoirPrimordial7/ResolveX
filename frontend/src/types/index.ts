@@ -9,15 +9,25 @@ export interface User {
   name: string;
   full_name: string;
   email: string;
+  avatar_url: string | null;
   role: UserRole;
   is_active: boolean;
   created_at: string;
   updated_at: string;
 }
 
+export interface CommentAttachment {
+  id: string;
+  name: string;
+  type: string;
+  size: number;
+  url?: string | null;
+}
+
 export interface Comment {
   id: number;
   message: string;
+  attachments?: CommentAttachment[];
   created_at: string;
   author: User;
 }
@@ -81,6 +91,7 @@ export interface AgentWorkload {
   name: string;
   full_name: string;
   email: string;
+  avatar_url: string | null;
   active_ticket_count: number;
   open_ticket_count: number;
   in_progress_ticket_count: number;

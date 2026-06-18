@@ -10,5 +10,11 @@ export const authApi = {
   },
   me() {
     return api.get<User>("/auth/me").then((response) => response.data);
+  },
+  updateProfile(payload: { full_name?: string; avatar_url?: string | null }) {
+    return api.patch<User>("/users/me", payload).then((response) => response.data);
+  },
+  changePassword(payload: { current_password: string; new_password: string }) {
+    return api.patch<void>("/users/me/password", payload).then((response) => response.data);
   }
 };

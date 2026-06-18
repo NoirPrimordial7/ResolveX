@@ -47,17 +47,17 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50 text-neutral-950 transition-colors dark:bg-neutral-950 dark:text-white">
+    <div className="premium-pattern min-h-screen text-[#F5F7FB] transition-colors">
       <div className="absolute right-4 top-4 z-10">
         <ThemeToggle />
       </div>
 
       <main className="mx-auto grid min-h-screen w-full max-w-7xl gap-8 px-4 py-6 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:px-8">
-        <section className="relative hidden min-h-[calc(100vh-3rem)] overflow-hidden rounded-md border border-neutral-800 bg-neutral-950 p-8 text-white lg:flex lg:flex-col lg:justify-between">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(249,115,22,0.22),transparent_32%),linear-gradient(135deg,rgba(255,255,255,0.08),transparent_38%)]" />
+        <section className="chat-pattern relative hidden min-h-[calc(100vh-3rem)] overflow-hidden rounded-md border border-white/10 bg-[#11141B] p-8 text-white shadow-2xl shadow-black/35 lg:flex lg:flex-col lg:justify-between">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(231,111,81,0.24),transparent_34%),linear-gradient(135deg,rgba(255,255,255,0.08),transparent_38%)]" />
           <div className="relative">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-md bg-orange-500 text-neutral-950">
+              <div className="flex h-10 w-10 items-center justify-center rounded-md bg-accent-500 text-white shadow-glow">
                 <ShieldCheck size={21} aria-hidden="true" />
               </div>
               <div>
@@ -67,7 +67,7 @@ export default function Login() {
             </div>
 
             <div className="mt-24 max-w-xl">
-              <p className="inline-flex items-center gap-2 rounded-full border border-orange-500/30 bg-orange-500/10 px-3 py-1 text-xs font-semibold text-orange-200">
+              <p className="inline-flex items-center gap-2 rounded-full border border-accent-500/30 bg-accent-500/10 px-3 py-1 text-xs font-semibold text-accent-200">
                 <Sparkles size={14} aria-hidden="true" />
                 Premium ticket management
               </p>
@@ -81,7 +81,7 @@ export default function Login() {
           <div className="relative grid gap-3 sm:grid-cols-3">
             {["Live queue clarity", "Role aware routing", "Fast customer replies"].map((item) => (
               <div key={item} className="rounded-md border border-white/10 bg-white/[0.04] p-4">
-                <CheckCircle2 className="mb-3 text-orange-400" size={18} aria-hidden="true" />
+                <CheckCircle2 className="mb-3 text-accent-400" size={18} aria-hidden="true" />
                 <p className="text-sm font-medium text-white">{item}</p>
               </div>
             ))}
@@ -91,10 +91,10 @@ export default function Login() {
         <section className="flex min-h-[calc(100vh-3rem)] items-center justify-center py-14">
           <div className="w-full max-w-md">
             <div className="mb-8">
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-md bg-neutral-950 text-orange-500 dark:bg-white dark:text-orange-600 lg:hidden">
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-md bg-accent-500 text-white shadow-glow lg:hidden">
                 <ShieldCheck size={24} aria-hidden="true" />
               </div>
-              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-orange-600 dark:text-orange-400">Welcome back</p>
+              <p className="text-sm font-semibold uppercase text-accent-400">Welcome back</p>
               <h1 className="mt-3 text-3xl font-semibold tracking-tight text-neutral-950 dark:text-white">Sign in to ResolveX</h1>
               <p className="mt-2 text-sm leading-6 text-neutral-600 dark:text-neutral-400">
                 Manage support tickets with a focused admin-grade workspace.
@@ -109,7 +109,7 @@ export default function Login() {
                       Email
                     </label>
                     <div className="relative mt-2">
-                      <Mail className="pointer-events-none absolute left-3 top-3 text-neutral-400 dark:text-neutral-500" size={18} />
+                    <Mail className="pointer-events-none absolute left-3 top-3 text-[#6F7A91]" size={18} />
                       <Input
                         className="pl-10"
                         id="email"
@@ -126,7 +126,7 @@ export default function Login() {
                       Password
                     </label>
                     <div className="relative mt-2">
-                      <LockKeyhole className="pointer-events-none absolute left-3 top-3 text-neutral-400 dark:text-neutral-500" size={18} />
+                      <LockKeyhole className="pointer-events-none absolute left-3 top-3 text-[#6F7A91]" size={18} />
                       <Input
                         className="pl-10"
                         id="password"
@@ -152,7 +152,7 @@ export default function Login() {
 
                 <p className="mt-6 text-center text-sm text-neutral-600 dark:text-neutral-400">
                   New customer?{" "}
-                  <Link className="font-semibold text-orange-600 hover:text-orange-500 dark:text-orange-400" to="/register">
+                  <Link className="font-semibold text-accent-400 hover:text-accent-300" to="/register">
                     Create account
                   </Link>
                 </p>
@@ -165,7 +165,7 @@ export default function Login() {
                 {demoAccounts.map((account) => (
                   <button
                     key={account.email}
-                    className="flex items-center justify-between gap-3 rounded-md border border-neutral-200 px-3 py-2 text-left text-sm transition hover:border-orange-300 hover:bg-orange-50 dark:border-neutral-800 dark:hover:border-orange-500/40 dark:hover:bg-orange-500/10"
+                    className="flex items-center justify-between gap-3 rounded-md border border-white/10 bg-white/[0.03] px-3 py-2 text-left text-sm transition hover:border-accent-500/40 hover:bg-accent-500/10"
                     onClick={() => {
                       setEmail(account.email);
                       setPassword(account.password);

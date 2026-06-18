@@ -3,6 +3,7 @@ import { CheckCircle2, Inbox, Repeat2, RotateCcw, XCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import { ticketApi } from "../api/ticketApi";
+import Avatar from "../components/Avatar";
 import Button, { buttonClassName } from "../components/Button";
 import Card from "../components/Card";
 import EmptyState from "../components/EmptyState";
@@ -81,10 +82,10 @@ export default function AdminReassignmentRequests() {
       <Card className="p-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
-            <Repeat2 className="text-orange-600 dark:text-orange-400" size={20} aria-hidden="true" />
+            <Repeat2 className="text-accent-400" size={20} aria-hidden="true" />
             <div>
-              <p className="text-sm font-semibold text-neutral-950 dark:text-white">{pendingCount} pending in current view</p>
-              <p className="text-xs text-neutral-500 dark:text-neutral-400">Approve with a new agent or reject with context.</p>
+              <p className="text-sm font-semibold text-[#F5F7FB]">{pendingCount} pending in current view</p>
+              <p className="text-xs text-[#AAB3C5]">Approve with a new agent or reject with context.</p>
             </div>
           </div>
           <Select
@@ -109,7 +110,7 @@ export default function AdminReassignmentRequests() {
       )}
 
       {loading ? (
-        <Card className="p-5 text-sm text-neutral-600 dark:text-neutral-400">Loading requests...</Card>
+        <Card className="p-5 text-sm text-[#AAB3C5]">Loading requests...</Card>
       ) : requests.length === 0 ? (
         <EmptyState
           description="Agent reassignment requests matching the selected status will appear here."
@@ -124,16 +125,17 @@ export default function AdminReassignmentRequests() {
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <StatusBadge value={request.status} />
-                    <span className="text-xs text-neutral-500 dark:text-neutral-400">{formatDateTime(request.created_at)}</span>
+                    <span className="text-xs text-[#AAB3C5]">{formatDateTime(request.created_at)}</span>
                   </div>
-                  <h2 className="mt-3 text-lg font-semibold text-neutral-950 dark:text-white">
+                  <h2 className="mt-3 text-lg font-semibold text-[#F5F7FB]">
                     {request.ticket?.title || `Ticket #${request.ticket_id}`}
                   </h2>
-                  <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
-                    Requested by {request.requested_by.full_name}
+                  <p className="mt-2 flex flex-wrap items-center gap-2 text-sm text-[#AAB3C5]">
+                    <Avatar size="sm" user={request.requested_by} />
+                    <span>Requested by {request.requested_by.full_name}</span>
                     {request.current_assignee ? `, current assignee ${request.current_assignee.full_name}` : ""}
                   </p>
-                  <p className="mt-4 whitespace-pre-wrap text-sm leading-6 text-neutral-700 dark:text-neutral-300">{request.reason}</p>
+                  <p className="mt-4 whitespace-pre-wrap text-sm leading-6 text-[#DCE3F2]">{request.reason}</p>
                 </div>
                 <Link className={buttonClassName({ className: "shrink-0", size: "sm", variant: "secondary" })} to={`/tickets/${request.ticket_id}`}>
                   View Ticket
@@ -176,7 +178,7 @@ export default function AdminReassignmentRequests() {
                   </Button>
                 </form>
               ) : (
-                <div className="mt-5 rounded-md border border-neutral-200 bg-neutral-50 p-3 text-sm text-neutral-600 dark:border-neutral-800 dark:bg-neutral-950/50 dark:text-neutral-400">
+                <div className="mt-5 rounded-md border border-white/10 bg-white/[0.04] p-3 text-sm text-[#AAB3C5]">
                   {request.admin_response || "No admin response recorded."}
                 </div>
               )}
