@@ -7,9 +7,10 @@ import StatusBadge from "./StatusBadge";
 
 interface TicketCardProps {
   ticket: Ticket;
+  to?: string;
 }
 
-export default function TicketCard({ ticket }: TicketCardProps) {
+export default function TicketCard({ ticket, to }: TicketCardProps) {
   const createdDate = new Intl.DateTimeFormat("en", {
     month: "short",
     day: "numeric",
@@ -18,7 +19,7 @@ export default function TicketCard({ ticket }: TicketCardProps) {
 
   return (
     <Link
-      to={`/tickets/${ticket.id}`}
+      to={to || `/tickets/${ticket.id}`}
       className="panel-card group block p-5 transition hover:-translate-y-0.5 hover:border-orange-300 hover:shadow-md hover:shadow-neutral-200/60 dark:hover:border-orange-500/40 dark:hover:bg-neutral-900 dark:hover:shadow-none"
     >
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">

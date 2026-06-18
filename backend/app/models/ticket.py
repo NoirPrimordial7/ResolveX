@@ -10,6 +10,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
 
 if TYPE_CHECKING:
+    from app.models.assignment_request import TicketAssignmentRequest
     from app.models.comment import Comment
     from app.models.user import User
 
@@ -42,8 +43,9 @@ class Ticket(Base):
         Index("ix_tickets_status", "status"),
         Index("ix_tickets_priority", "priority"),
         Index("ix_tickets_category", "category"),
-        Index("ix_tickets_created_by_id", "created_by_id"),
-        Index("ix_tickets_assigned_to_id", "assigned_to_id"),
+        Index("ix_tickets_created_by", "created_by"),
+        Index("ix_tickets_assigned_to", "assigned_to"),
+        Index("ix_tickets_created_at", "created_at"),
     )
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
@@ -63,8 +65,16 @@ class Ticket(Base):
         default=TicketStatus.OPEN,
         nullable=False,
     )
-    created_by_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    assigned_to_id: Mapped[int | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    created_by_id: Mapped[int] = mapped_column(
+        "created_by",
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    assigned_to_id: Mapped[int | None] = mapped_column(
+        "assigned_to",
+        ForeignKey("users.id", ondelete="SET NULL"),
+        nullable=True,
+    )
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
@@ -72,6 +82,7 @@ class Ticket(Base):
         onupdate=func.now(),
         nullable=False,
     )
+    resolved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     created_by: Mapped["User"] = relationship(
         "User",
@@ -88,4 +99,10 @@ class Ticket(Base):
         back_populates="ticket",
         cascade="all, delete-orphan",
         order_by="Comment.created_at",
+    )
+    reassignment_requests: Mapped[list["TicketAssignmentRequest"]] = relationship(
+        "TicketAssignmentRequest",
+        back_populates="ticket",
+        cascade="all, delete-orphan",
+        order_by="TicketAssignmentRequest.created_at.desc()",
     )

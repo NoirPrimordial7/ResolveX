@@ -39,7 +39,7 @@ export default function CustomerDashboard() {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <PageHeader
         action={
           <Link className={buttonClassName({ variant: "primary" })} to="/tickets/new">
@@ -49,23 +49,23 @@ export default function CustomerDashboard() {
         }
         description="Track your submitted issues and continue conversations with the support team."
         eyebrow="Customer Dashboard"
-        title="Your Support Hub"
+        title="Customer Support Hub"
       />
 
       <Card className="relative overflow-hidden p-5">
         <div className="absolute inset-y-0 right-0 hidden w-1/3 bg-[radial-gradient(circle_at_70%_35%,rgba(249,115,22,0.18),transparent_45%)] dark:block" />
         <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
+          <div className="min-w-0">
             <p className="inline-flex items-center gap-2 rounded-full border border-orange-200 bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-700 dark:border-orange-500/20 dark:bg-orange-500/10 dark:text-orange-300">
               <Sparkles size={14} aria-hidden="true" />
               Welcome back
             </p>
             <h2 className="mt-4 text-xl font-semibold text-neutral-950 dark:text-white">{user?.full_name}</h2>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-600 dark:text-neutral-400">
+            <p className="mt-2 max-w-4xl text-sm leading-6 text-neutral-600 dark:text-neutral-400">
               Create a ticket with enough context, then follow status updates and replies from this dashboard.
             </p>
           </div>
-          <div className="grid grid-cols-3 gap-3 sm:w-64">
+          <div className="grid grid-cols-3 gap-3 sm:w-72 xl:w-80">
             <div className="rounded-md border border-neutral-200 bg-neutral-50 p-3 text-center dark:border-neutral-800 dark:bg-neutral-950/50">
               <p className="text-lg font-semibold text-neutral-950 dark:text-white">{stats.total}</p>
               <p className="text-xs text-neutral-500 dark:text-neutral-400">Total</p>
@@ -125,7 +125,7 @@ export default function CustomerDashboard() {
           title="No tickets found"
         />
       ) : (
-        <div className="grid gap-4">
+        <div className="grid gap-4 2xl:grid-cols-2">
           {tickets.map((ticket) => (
             <TicketCard key={ticket.id} ticket={ticket} />
           ))}

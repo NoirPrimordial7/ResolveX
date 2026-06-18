@@ -18,7 +18,7 @@ export default function Register() {
   const [submitting, setSubmitting] = useState(false);
 
   if (user) {
-    return <Navigate to={user.role === "admin" ? "/admin/dashboard" : "/dashboard"} replace />;
+    return <Navigate to={user.role === "admin" ? "/admin/dashboard" : user.role === "support_agent" ? "/agent/dashboard" : "/customer/dashboard"} replace />;
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -27,7 +27,7 @@ export default function Register() {
     setSubmitting(true);
     try {
       await register({ full_name: fullName, email, password });
-      navigate("/dashboard", { replace: true });
+      navigate("/customer/dashboard", { replace: true });
     } catch {
       setError("Registration failed. Check the form or try another email.");
     } finally {

@@ -14,12 +14,17 @@ if TYPE_CHECKING:
 
 
 class Comment(Base):
-    __tablename__ = "comments"
+    __tablename__ = "ticket_comments"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     message: Mapped[str] = mapped_column(Text, nullable=False)
     ticket_id: Mapped[int] = mapped_column(ForeignKey("tickets.id", ondelete="CASCADE"), index=True, nullable=False)
-    author_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True, nullable=False)
+    author_id: Mapped[int] = mapped_column(
+        "user_id",
+        ForeignKey("users.id", ondelete="CASCADE"),
+        index=True,
+        nullable=False,
+    )
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
     ticket: Mapped["Ticket"] = relationship("Ticket", back_populates="comments")

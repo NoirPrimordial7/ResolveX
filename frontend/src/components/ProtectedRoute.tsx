@@ -8,6 +8,12 @@ interface ProtectedRouteProps {
   roles?: UserRole[];
 }
 
+function defaultRouteForRole(role: UserRole) {
+  if (role === "admin") return "/admin/dashboard";
+  if (role === "support_agent") return "/agent/dashboard";
+  return "/customer/dashboard";
+}
+
 export default function ProtectedRoute({ children, roles }: ProtectedRouteProps) {
   const { user, loading } = useAuth();
   const location = useLocation();
@@ -25,7 +31,7 @@ export default function ProtectedRoute({ children, roles }: ProtectedRouteProps)
   }
 
   if (roles && !roles.includes(user.role)) {
-    return <Navigate to={user.role === "admin" ? "/admin/dashboard" : "/dashboard"} replace />;
+    return <Navigate to={defaultRouteForRole(user.role)} replace />;
   }
 
   return <>{children}</>;
