@@ -7,11 +7,51 @@ import { Input } from "../components/Input";
 import PixelIcon from "../components/PixelIcon";
 import ThemeToggle from "../components/ThemeToggle";
 import { useAuth } from "../context/AuthContext";
+import { cn } from "../utils/cn";
 
 const demoAccounts = [
-  { label: "Placement Head", email: "admin@resolvex.com", password: "Admin@123" },
-  { label: "Faculty Coordinator", email: "agent@resolvex.com", password: "Agent@123" },
-  { label: "Student", email: "customer@resolvex.com", password: "Customer@123" }
+  {
+    chip: "Head",
+    name: "Dr. Swati More",
+    roleLabel: "Placement Head",
+    email: "head.placement@resolvex.edu",
+    password: "Password@123"
+  },
+  {
+    chip: "Meera",
+    name: "Prof. Meera Sharma",
+    roleLabel: "Faculty Coordinator",
+    email: "faculty.meera@resolvex.edu",
+    password: "Password@123"
+  },
+  {
+    chip: "Rahul",
+    name: "Prof. Rahul Deshmukh",
+    roleLabel: "Faculty Coordinator",
+    email: "faculty.rahul@resolvex.edu",
+    password: "Password@123"
+  },
+  {
+    chip: "Aditya",
+    name: "Aditya Gholap",
+    roleLabel: "Student",
+    email: "student.aditya@resolvex.edu",
+    password: "Password@123"
+  },
+  {
+    chip: "Arya",
+    name: "Arya Dhumal",
+    roleLabel: "Student",
+    email: "student.arya@resolvex.edu",
+    password: "Password@123"
+  },
+  {
+    chip: "Shambhavi",
+    name: "Shambhavi Karanjkar",
+    roleLabel: "Student",
+    email: "student.shambhavi@resolvex.edu",
+    password: "Password@123"
+  }
 ];
 
 function defaultRouteForRole(role: string) {
@@ -23,10 +63,11 @@ function defaultRouteForRole(role: string) {
 export default function Login() {
   const { login, user } = useAuth();
   const navigate = useNavigate();
-  const [email, setEmail] = useState("admin@resolvex.com");
-  const [password, setPassword] = useState("Admin@123");
+  const [email, setEmail] = useState("head.placement@resolvex.edu");
+  const [password, setPassword] = useState("Password@123");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const selectedDemoAccount = demoAccounts.find((account) => account.email === email && account.password === password);
 
   if (user) {
     return <Navigate to={defaultRouteForRole(user.role)} replace />;
@@ -71,11 +112,11 @@ export default function Login() {
                 Campus Placement Support
               </p>
               <h1 className="display-type mt-6 text-6xl leading-[0.88] app-text-primary sm:text-7xl xl:text-8xl">
-                Resolve Queries.
+                RESOLVE QUERIES.
                 <br />
-                Assign Faculty.
+                ASSIGN FACULTY.
                 <br />
-                Close Clean.
+                CLOSE CLEAN.
               </h1>
               <p className="mt-6 max-w-xl text-base leading-7 app-text-muted">
                 Prioritize placement queries, assign faculty ownership, and keep every student conversation moving from one focused workspace.
@@ -165,28 +206,43 @@ export default function Login() {
             </Card>
 
             <Card className="mt-4 p-4">
-              <p className="text-xs font-black uppercase app-text-primary">Demo credentials</p>
-              <div className="mt-3 grid gap-2">
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-xs font-black uppercase app-text-primary">Demo access</p>
+                {selectedDemoAccount && (
+                  <span className="rounded-full border border-accent-500/20 bg-accent-500/10 px-2 py-1 text-[10px] font-black uppercase text-orange-700 dark:rounded-sm dark:text-accent-200">
+                    {selectedDemoAccount.roleLabel}
+                  </span>
+                )}
+              </div>
+
+              <div className="mt-3 grid grid-cols-3 gap-2">
                 {demoAccounts.map((account) => (
                   <button
                     key={account.email}
-                    className="flex items-center justify-between gap-3 rounded-sm border border-orange-200/80 bg-orange-50/70 px-3 py-2 text-left text-sm transition hover:border-accent-500/45 hover:bg-accent-500/10 dark:border-white/10 dark:bg-[#0B0B0A]/70"
+                    aria-label={`Use ${account.name} demo account`}
+                    aria-pressed={selectedDemoAccount?.email === account.email}
+                    className={cn(
+                      "min-h-10 rounded-xl border px-2.5 py-2 text-center text-[11px] font-black uppercase outline-none transition focus-visible:ring-2 focus-visible:ring-accent-500/35 dark:rounded-sm",
+                      selectedDemoAccount?.email === account.email
+                        ? "border-accent-500/70 bg-accent-500 text-[#0B0B0A] shadow-glow"
+                        : "border-orange-200/70 bg-white/60 app-text-primary hover:border-accent-500/45 hover:bg-accent-500/10 dark:border-white/10 dark:bg-white/[0.04] dark:hover:bg-accent-500/10"
+                    )}
                     onClick={() => {
                       setEmail(account.email);
                       setPassword(account.password);
                     }}
                     type="button"
                   >
-                    <span>
-                      <span className="block text-xs font-black uppercase app-text-primary">{account.label}</span>
-                      <span className="block font-mono text-xs app-text-muted">
-                        {account.email} -- {account.password}
-                      </span>
-                    </span>
-                    <PixelIcon className="text-accent-400" name="command" size={18} />
+                    {account.chip}
                   </button>
                 ))}
               </div>
+
+              {selectedDemoAccount && (
+                <p className="mt-3 truncate text-xs app-text-muted">
+                  {selectedDemoAccount.name}
+                </p>
+              )}
             </Card>
           </div>
         </section>

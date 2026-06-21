@@ -31,11 +31,11 @@ DEMO_PASSWORD = "Password@123"
 
 DEMO_USERS = [
     {
-        "full_name": "Arya Patil",
+        "full_name": "Arya Dhumal",
         "email": "student.arya@resolvex.edu",
         "role": UserRole.CUSTOMER,
         "display_role": "Student",
-        "initials": "AP",
+        "initials": "AD",
     },
     {
         "full_name": "Shambhavi Karanjkar",
@@ -73,6 +73,27 @@ DEMO_USERS = [
         "initials": "SM",
     },
 ]
+
+PLACEMENT_DEMO_EMAILS = {item["email"] for item in DEMO_USERS}
+
+LEGACY_DEMO_EMAILS = {
+    "admin@resolvex.com",
+    "agent@resolvex.com",
+    "customer@resolvex.com",
+    "production.customer1@resolvex.com",
+    "test.user@resolvex.com",
+}
+
+LEGACY_DEMO_NAMES = {
+    "demo agent",
+    "demo customer",
+    "old test user",
+    "production customer1",
+    "production customer 1",
+    "resolvex admin",
+    "resolvex agent",
+    "test user",
+}
 
 
 def _initials_avatar_data_uri(initials: str, role: UserRole) -> str:
@@ -152,6 +173,28 @@ def _upsert_demo_users(db: Session, now: datetime) -> tuple[dict[str, User], int
 
     db.flush()
     return users_by_email, created, updated
+
+
+def _deactivate_legacy_demo_users(db: Session, now: datetime) -> int:
+    deactivated = 0
+
+    for user in db.scalars(select(User)).all():
+        normalized_email = user.email.lower()
+        normalized_name = user.full_name.strip().lower()
+        if normalized_email in PLACEMENT_DEMO_EMAILS:
+            continue
+        if normalized_email not in LEGACY_DEMO_EMAILS and normalized_name not in LEGACY_DEMO_NAMES:
+            continue
+        if not user.is_active:
+            continue
+
+        user.is_active = False
+        user.updated_at = now
+        db.add(user)
+        deactivated += 1
+
+    db.flush()
+    return deactivated
 
 
 def _ticket_specs(now: datetime) -> list[dict[str, Any]]:
@@ -616,6 +659,7 @@ def _print_summary(summary: dict[str, int]) -> None:
     print("\nPlacement demo seed complete.")
     print(f"Users created: {summary['users_created']}")
     print(f"Users updated: {summary['users_updated']}")
+    print(f"Legacy demo users deactivated: {summary['legacy_users_deactivated']}")
     print(f"Tickets created: {summary['tickets_created']}")
     print(f"Comments created: {summary['comments_created']}")
     print(f"Handover requests created: {summary['handover_requests_created']}")
@@ -647,6 +691,7 @@ def seed_placement_demo() -> None:
             "tickets_deleted": _delete_model_rows(db, Ticket),
             "users_created": 0,
             "users_updated": 0,
+            "legacy_users_deactivated": 0,
             "tickets_created": 0,
             "comments_created": 0,
             "handover_requests_created": 0,
@@ -656,6 +701,7 @@ def seed_placement_demo() -> None:
         users_by_email, users_created, users_updated = _upsert_demo_users(db, now)
         summary["users_created"] = users_created
         summary["users_updated"] = users_updated
+        summary["legacy_users_deactivated"] = _deactivate_legacy_demo_users(db, now)
 
         tickets_by_key, tickets_created, comments_created = _create_tickets_and_comments(db, users_by_email, now)
         summary["tickets_created"] = tickets_created
