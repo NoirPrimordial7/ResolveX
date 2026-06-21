@@ -12,6 +12,7 @@ from app.db.base import Base
 if TYPE_CHECKING:
     from app.models.assignment_request import TicketAssignmentRequest
     from app.models.comment import Comment
+    from app.models.notification import Notification
     from app.models.ticket import Ticket
 
 
@@ -58,6 +59,12 @@ class User(Base):
         "TicketAssignmentRequest",
         foreign_keys="TicketAssignmentRequest.requested_by_id",
         back_populates="requested_by",
+    )
+    notifications: Mapped[list["Notification"]] = relationship(
+        "Notification",
+        foreign_keys="Notification.user_id",
+        back_populates="user",
+        cascade="all, delete-orphan",
     )
 
     @property

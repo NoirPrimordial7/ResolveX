@@ -153,20 +153,20 @@ export default function ProfileModal({ onClose, open }: ProfileModalProps) {
       <section
         aria-modal="true"
         aria-labelledby="profile-title"
-        className="max-h-[calc(100dvh-1rem)] min-h-[calc(100dvh-1rem)] w-full max-w-4xl overflow-y-auto rounded-none border border-white/10 bg-[#111111] shadow-2xl shadow-black/55 sm:min-h-0 sm:max-h-[calc(100vh-2rem)] sm:rounded-sm"
+        className="app-modal max-h-[calc(100dvh-1rem)] min-h-[calc(100dvh-1rem)] w-full max-w-4xl overflow-y-auto rounded-none sm:min-h-0 sm:max-h-[calc(100vh-2rem)] sm:rounded-sm"
         onClick={(event) => event.stopPropagation()}
         role="dialog"
       >
-        <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-white/10 bg-[#111111]/95 px-5 py-4 backdrop-blur-xl">
+        <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-orange-200/70 bg-[#FFFDF8]/95 px-5 py-4 backdrop-blur-xl dark:border-white/10 dark:bg-[#111111]/95">
           <div>
             <p className="eyebrow">Account</p>
-            <h2 id="profile-title" className="display-type mt-3 text-4xl leading-none text-[#F5F1EA]">
+            <h2 id="profile-title" className="display-type mt-3 text-4xl leading-none app-text-primary">
               Profile settings
             </h2>
           </div>
           <button
             aria-label="Close profile settings"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-sm border border-white/10 text-[#A7A29A] transition hover:border-accent-500/45 hover:bg-accent-500/10 hover:text-[#F5F1EA] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/40"
+            className="app-icon-button"
             onClick={onClose}
             type="button"
           >
@@ -175,11 +175,11 @@ export default function ProfileModal({ onClose, open }: ProfileModalProps) {
         </div>
 
         <div className="grid gap-5 p-5 lg:grid-cols-[240px_minmax(0,1fr)]">
-          <aside className="border border-white/10 bg-white/[0.03] p-4">
+          <aside className="app-card-muted p-4">
             <div className="flex flex-col items-center text-center">
               <Avatar className="h-24 w-24 text-3xl ring-4 ring-accent-500/10" size="xl" user={previewUser} />
-              <p className="mt-4 max-w-full truncate text-xs font-black uppercase text-[#F5F1EA]">{fullName}</p>
-              <p className="mt-1 max-w-full truncate text-xs text-[#A7A29A]">{user.email}</p>
+              <p className="mt-4 max-w-full truncate text-xs font-black uppercase app-text-primary">{fullName}</p>
+              <p className="mt-1 max-w-full truncate text-xs app-text-muted">{user.email}</p>
             </div>
 
             <label className="mt-5 flex h-10 cursor-pointer items-center justify-center gap-2 rounded-sm bg-accent-500 px-3 text-xs font-black uppercase text-[#0B0B0A] shadow-glow transition hover:bg-accent-400">
@@ -191,16 +191,16 @@ export default function ProfileModal({ onClose, open }: ProfileModalProps) {
               <PixelIcon name="trash" size={18} />
               Remove
             </Button>
-            <p className="mt-3 border-t border-white/10 pt-3 text-xs leading-5 text-[#A7A29A]">
+            <p className="mt-3 border-t border-orange-200/70 pt-3 text-xs leading-5 app-text-muted dark:border-white/10">
               Images are stored as compact profile data URLs for this workspace.
             </p>
           </aside>
 
           <div className="space-y-5">
-            <form className="border border-white/10 bg-white/[0.03] p-4" onSubmit={handleProfileSubmit}>
+            <form className="app-card-muted p-4" onSubmit={handleProfileSubmit}>
               <div className="mb-4 flex items-center gap-2 text-accent-400">
                 <PixelIcon name="user" size={22} />
-                <h3 className="text-xs font-black uppercase text-[#F5F1EA]">Account details</h3>
+                <h3 className="text-xs font-black uppercase app-text-primary">Account details</h3>
               </div>
               <label className="label" htmlFor="profile-name">
                 Display name
@@ -220,8 +220,8 @@ export default function ProfileModal({ onClose, open }: ProfileModalProps) {
                     className={cn(
                     "mt-3 rounded-sm border p-3 text-sm",
                     profileError
-                      ? "border-red-500/25 bg-red-500/10 text-red-200"
-                      : "border-emerald-500/25 bg-emerald-500/10 text-emerald-200"
+                      ? "border-red-200 bg-red-50 text-red-700 dark:border-red-500/25 dark:bg-red-500/10 dark:text-red-300"
+                      : "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/25 dark:bg-emerald-500/10 dark:text-emerald-300"
                   )}
                 >
                   {profileError || profileNotice}
@@ -239,10 +239,10 @@ export default function ProfileModal({ onClose, open }: ProfileModalProps) {
               </div>
             </form>
 
-            <form className="border border-white/10 bg-white/[0.03] p-4" onSubmit={handlePasswordSubmit}>
+            <form className="app-card-muted p-4" onSubmit={handlePasswordSubmit}>
               <div className="flex items-center gap-2">
                 <PixelIcon className="text-accent-400" name="key" size={22} />
-                <h3 className="text-xs font-black uppercase text-[#F5F1EA]">Password</h3>
+                <h3 className="text-xs font-black uppercase app-text-primary">Password</h3>
               </div>
 
               <div className="mt-4 grid gap-4 sm:grid-cols-2">
@@ -280,8 +280,8 @@ export default function ProfileModal({ onClose, open }: ProfileModalProps) {
                     className={cn(
                     "mt-3 rounded-sm border p-3 text-sm",
                     passwordError
-                      ? "border-red-500/25 bg-red-500/10 text-red-200"
-                      : "border-emerald-500/25 bg-emerald-500/10 text-emerald-200"
+                      ? "border-red-200 bg-red-50 text-red-700 dark:border-red-500/25 dark:bg-red-500/10 dark:text-red-300"
+                      : "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/25 dark:bg-emerald-500/10 dark:text-emerald-300"
                   )}
                 >
                   {passwordError || passwordNotice}
@@ -294,12 +294,12 @@ export default function ProfileModal({ onClose, open }: ProfileModalProps) {
               </Button>
             </form>
 
-            <div className="border border-white/10 bg-[#0B0B0A]/75 p-4">
+            <div className="app-card-muted p-4">
               <div className="flex items-center gap-2 text-accent-400">
                 <PixelIcon name="command" size={22} />
-                <h3 className="text-xs font-black uppercase text-[#F5F1EA]">Actions</h3>
+                <h3 className="text-xs font-black uppercase app-text-primary">Actions</h3>
               </div>
-              <p className="mt-2 text-sm leading-6 text-[#A7A29A]">
+              <p className="mt-2 text-sm leading-6 app-text-muted">
                 Save account changes independently from password updates. Use cancel or the backdrop to leave settings.
               </p>
             </div>

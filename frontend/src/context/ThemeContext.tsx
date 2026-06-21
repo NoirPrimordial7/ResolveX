@@ -17,23 +17,23 @@ function getInitialTheme(): Theme {
     return savedTheme;
   }
 
-  return "dark";
+  return "light";
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(getInitialTheme);
 
   useEffect(() => {
-    document.documentElement.classList.add("dark");
-    document.documentElement.style.colorScheme = "dark";
-    localStorage.setItem(STORAGE_KEY, "dark");
+    document.documentElement.classList.toggle("dark", theme === "dark");
+    document.documentElement.style.colorScheme = theme;
+    localStorage.setItem(STORAGE_KEY, theme);
   }, [theme]);
 
   const value = useMemo(
     () => ({
       theme,
-      setTheme: () => setThemeState("dark"),
-      toggleTheme: () => setThemeState("dark")
+      setTheme: setThemeState,
+      toggleTheme: () => setThemeState((current) => (current === "dark" ? "light" : "dark"))
     }),
     [theme]
   );

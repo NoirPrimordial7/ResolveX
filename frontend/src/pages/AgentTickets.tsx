@@ -1,79 +1,102 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 
 import { ticketApi, type AgentTicketFilters } from "../api/ticketApi";
-import Avatar from "../components/Avatar";
 import Button, { buttonClassName } from "../components/Button";
 import Card from "../components/Card";
 import EmptyState from "../components/EmptyState";
 import { Input, Select } from "../components/Input";
 import PageHeader from "../components/PageHeader";
 import PixelIcon from "../components/PixelIcon";
-import PriorityBadge from "../components/PriorityBadge";
-import StatusBadge from "../components/StatusBadge";
-import TicketCard from "../components/TicketCard";
+import TicketQueueRow from "../components/TicketQueueRow";
+import { useNotifications } from "../context/NotificationContext";
 import type { Ticket, TicketCategory, TicketPriority, TicketStatus } from "../types";
 import { categories, priorities, statuses } from "../types";
 
+const agentStatuses: TicketStatus[] = ["In Progress", "Resolved"];
+
 export default function AgentTickets() {
+  const { observeTickets } = useNotifications();
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<TicketStatus | "">("");
   const [priority, setPriority] = useState<TicketPriority | "">("");
   const [category, setCategory] = useState<TicketCategory | "">("");
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
-  const loadTickets = useCallback(async () => {
-    setLoading(true);
-    const filters: AgentTicketFilters = { status, priority, category };
-    const data = await ticketApi.agentTickets(filters);
-    setTickets(data);
-    setLoading(false);
-  }, [category, priority, status]);
+  const loadTickets = useCallback(
+    async (silent = false) => {
+      if (silent) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
+
+      try {
+        const filters: AgentTicketFilters = { status, priority, category };
+        const data = await ticketApi.agentTickets(filters);
+        setTickets(data);
+        observeTickets("agent-ticket-list", data, {
+          label: "assigned student query",
+          ticketPath: (ticket) => `/agent/tickets/${ticket.id}`
+        });
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
+      }
+    },
+    [category, observeTickets, priority, status]
+  );
 
   useEffect(() => {
     loadTickets();
   }, [loadTickets]);
 
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      loadTickets(true).catch(() => setRefreshing(false));
+    }, 25_000);
+
+    return () => window.clearInterval(interval);
+  }, [loadTickets]);
+
   async function handleStatus(ticketId: number, nextStatus: TicketStatus) {
-    await ticketApi.agentUpdateStatus(ticketId, nextStatus);
-    await loadTickets();
+    const updated = await ticketApi.agentUpdateStatus(ticketId, nextStatus);
+    setTickets((current) => current.map((ticket) => (ticket.id === ticketId ? { ...ticket, ...updated } : ticket)));
+    await loadTickets(true);
   }
 
-  const visibleTickets = tickets.filter((ticket) => {
+  const visibleTickets = useMemo(() => {
     const pattern = search.trim().toLowerCase();
-    if (!pattern) return true;
-    return (
-      ticket.title.toLowerCase().includes(pattern) ||
-      ticket.description.toLowerCase().includes(pattern) ||
-      ticket.created_by.full_name.toLowerCase().includes(pattern)
+    if (!pattern) return tickets;
+    return tickets.filter((ticket) =>
+      [ticket.title, ticket.description, ticket.category, ticket.priority, ticket.status, ticket.created_by.full_name]
+        .join(" ")
+        .toLowerCase()
+        .includes(pattern)
     );
-  });
+  }, [search, tickets]);
 
   return (
     <div className="space-y-5">
       <PageHeader
         action={
-          <Button onClick={loadTickets} type="button" variant="secondary">
+          <Button onClick={() => loadTickets(true)} type="button" variant="secondary">
             <PixelIcon name="refresh" size={18} />
             Refresh
           </Button>
         }
-        description="Filter your assigned queue and keep statuses moving as work progresses."
-        eyebrow="Agent Tickets"
-        title="Assigned Tickets"
+        description={refreshing ? "Refreshing assigned student queue quietly..." : "Filter assigned placement queries and keep statuses moving as work progresses."}
+        eyebrow="Faculty Coordinator"
+        title="Assigned Student Queries"
       />
 
       <Card className="p-4">
         <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_180px_180px_200px]">
           <div className="relative min-w-0">
-            <PixelIcon className="pointer-events-none absolute left-3 top-2.5 text-[#726D66]" name="search" size={20} />
-            <Input
-              className="pl-10"
-              placeholder="Search assigned tickets"
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-            />
+            <PixelIcon className="pointer-events-none absolute left-3 top-2.5 text-stone-400 dark:text-[#A7A29A]" name="search" size={20} />
+            <Input className="pl-10" placeholder="Search student queries" value={search} onChange={(event) => setSearch(event.target.value)} />
           </div>
           <Select value={status} onChange={(event) => setStatus(event.target.value as TicketStatus | "")}>
             <option value="">All statuses</option>
@@ -103,64 +126,38 @@ export default function AgentTickets() {
       </Card>
 
       {loading ? (
-        <Card className="p-5 text-sm text-[#A7A29A]">Loading assigned tickets...</Card>
+        <Card className="p-5 text-sm text-stone-500 dark:text-[#A7A29A]">Loading assigned student queries...</Card>
       ) : visibleTickets.length === 0 ? (
-        <EmptyState
-          description="Assigned tickets that match your filters will appear here."
-          title="No assigned tickets found"
-        />
+        <EmptyState description="Assigned student queries that match your filters will appear here." title="No assigned queries found" />
       ) : (
-        <>
-          <div className="grid gap-4 xl:hidden">
-            {visibleTickets.map((ticket) => (
-              <Card key={ticket.id} className="p-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="text-xs font-semibold uppercase text-accent-400">
-                      {ticket.category}
-                    </p>
-                    <h2 className="mt-2 line-clamp-2 text-base font-black uppercase text-[#F5F1EA]">{ticket.title}</h2>
-                    <p className="mt-1 flex min-w-0 items-center gap-2 truncate text-sm text-[#A7A29A]">
-                      <Avatar size="sm" user={ticket.created_by} />
-                      <span className="truncate">{ticket.created_by.full_name}</span>
-                    </p>
+        <Card className="overflow-hidden p-0">
+          {visibleTickets.map((ticket) => {
+            const statusOptions = [ticket.status, ...agentStatuses.filter((item) => item !== ticket.status)];
+            return (
+              <TicketQueueRow
+                actions={
+                  <div className="grid gap-2">
+                    <Select className="py-2 text-xs" value={ticket.status} onChange={(event) => handleStatus(ticket.id, event.target.value as TicketStatus)}>
+                      {statusOptions.map((item) => (
+                        <option key={item} value={item}>
+                          {item}
+                        </option>
+                      ))}
+                    </Select>
+                    <Link className={buttonClassName({ size: "sm", variant: "secondary" })} to={`/agent/tickets/${ticket.id}`}>
+                      <PixelIcon name="eye" size={16} />
+                      Open Query
+                    </Link>
                   </div>
-                  <Link
-                    className={buttonClassName({ className: "shrink-0 px-3", size: "sm", variant: "secondary" })}
-                    to={`/agent/tickets/${ticket.id}`}
-                  >
-                    <PixelIcon name="eye" size={16} />
-                    View
-                  </Link>
-                </div>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <StatusBadge value={ticket.status} />
-                  <PriorityBadge value={ticket.priority} />
-                </div>
-                <Select
-                  className="mt-4 py-2 text-xs"
-                  value={ticket.status}
-                  onChange={(event) => handleStatus(ticket.id, event.target.value as TicketStatus)}
-                >
-                  <option value={ticket.status}>{ticket.status}</option>
-                  {["In Progress", "Resolved"]
-                    .filter((item) => item !== ticket.status)
-                    .map((item) => (
-                      <option key={item} value={item}>
-                        {item}
-                      </option>
-                    ))}
-                </Select>
-              </Card>
-            ))}
-          </div>
-
-          <div className="hidden grid-cols-2 gap-4 xl:grid 2xl:grid-cols-3">
-            {visibleTickets.map((ticket) => (
-              <TicketCard key={ticket.id} ticket={ticket} to={`/agent/tickets/${ticket.id}`} />
-            ))}
-          </div>
-        </>
+                }
+                key={ticket.id}
+                role="agent"
+                ticket={ticket}
+                to={`/agent/tickets/${ticket.id}`}
+              />
+            );
+          })}
+        </Card>
       )}
     </div>
   );

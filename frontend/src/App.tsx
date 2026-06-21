@@ -3,6 +3,7 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import AppShell from "./components/AppShell";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import { NotificationProvider } from "./context/NotificationContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import AgentDashboard from "./pages/AgentDashboard";
 import AgentTicketDetails from "./pages/AgentTicketDetails";
@@ -29,7 +30,7 @@ function RootRedirect() {
 
   if (loading) {
     return (
-      <div className="premium-pattern flex min-h-screen items-center justify-center text-sm text-[#A7A29A] transition-colors">
+      <div className="app-page flex items-center justify-center text-sm app-text-muted">
         Loading ResolveX...
       </div>
     );
@@ -54,8 +55,9 @@ export default function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <BrowserRouter>
-          <Routes>
+        <NotificationProvider>
+          <BrowserRouter>
+            <Routes>
             <Route path="/" element={<RootRedirect />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
@@ -141,8 +143,9 @@ export default function App() {
               }
             />
             <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </BrowserRouter>
+            </Routes>
+          </BrowserRouter>
+        </NotificationProvider>
       </AuthProvider>
     </ThemeProvider>
   );

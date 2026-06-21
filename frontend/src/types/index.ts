@@ -3,6 +3,16 @@ export type TicketCategory = "Technical" | "Billing" | "Account" | "General" | "
 export type TicketPriority = "Low" | "Medium" | "High" | "Urgent";
 export type TicketStatus = "Open" | "In Progress" | "Resolved" | "Closed";
 export type ReassignmentRequestStatus = "Pending" | "Approved" | "Rejected";
+export type NotificationType =
+  | "ticket_created"
+  | "ticket_updated"
+  | "status_changed"
+  | "assignment_changed"
+  | "comment_added"
+  | "priority_changed"
+  | "reassignment_requested"
+  | "reassignment_approved"
+  | "reassignment_rejected";
 
 export interface User {
   id: number;
@@ -30,6 +40,7 @@ export interface Comment {
   attachments?: CommentAttachment[];
   created_at: string;
   author: User;
+  delivery_status?: "sending" | "failed";
 }
 
 export interface Ticket {
@@ -127,6 +138,20 @@ export interface ReassignmentRequest {
   created_at: string;
   resolved_at: string | null;
   ticket: Ticket | null;
+}
+
+export interface ResolveXNotification {
+  id: number;
+  user_id: number;
+  actor_id: number | null;
+  ticket_id: number | null;
+  type: NotificationType;
+  title: string;
+  message: string;
+  dedupe_key: string;
+  is_read: boolean;
+  metadata_json: string | null;
+  created_at: string;
 }
 
 export const categories: TicketCategory[] = ["Technical", "Billing", "Account", "General", "Other"];

@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useCallback, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
 import { ticketApi } from "../api/ticketApi";
@@ -10,7 +10,9 @@ import { Select, Textarea } from "../components/Input";
 import PixelIcon from "../components/PixelIcon";
 import TicketMetaSidebar from "../components/TicketMetaSidebar";
 import { useAuth } from "../context/AuthContext";
-import type { CommentAttachment, Ticket, TicketStatus } from "../types";
+import { useNotifications } from "../context/NotificationContext";
+import { useTicketPolling } from "../hooks/useTicketPolling";
+import type { Comment, CommentAttachment, Ticket, TicketStatus } from "../types";
 
 const agentStatuses: TicketStatus[] = ["In Progress", "Resolved"];
 
@@ -24,6 +26,7 @@ function formatDateTime(value: string) {
 export default function AgentTicketDetails() {
   const { ticketId } = useParams();
   const { user } = useAuth();
+  const { markTicketRead } = useNotifications();
   const [ticket, setTicket] = useState<Ticket | null>(null);
   const [reason, setReason] = useState("");
   const [messageError, setMessageError] = useState("");
@@ -35,16 +38,26 @@ export default function AgentTicketDetails() {
 
   const id = Number(ticketId);
 
+  const fetchTicket = useCallback(() => ticketApi.agentTicketDetails(id), [id]);
+
   async function loadTicket() {
     if (!id) return;
     setLoading(true);
     try {
-      const data = await ticketApi.agentTicketDetails(id);
+      const data = await fetchTicket();
       setTicket(data);
+      void markTicketRead(data.id);
     } finally {
       setLoading(false);
     }
   }
+
+  const { refetchTicket, syncing } = useTicketPolling({
+    enabled: Boolean(ticket),
+    fetchTicket,
+    setTicket,
+    ticket
+  });
 
   useEffect(() => {
     loadTicket();
@@ -56,26 +69,70 @@ export default function AgentTicketDetails() {
     setNotice("");
     try {
       const updated = await ticketApi.agentUpdateStatus(ticket.id, nextStatus);
-      setTicket(updated);
-      setNotice(`Ticket moved to ${nextStatus}.`);
+      setTicket((current) => (current ? { ...current, ...updated, comments: current.comments || [] } : updated));
+      setNotice(`Query moved to ${nextStatus}.`);
     } catch {
       setActionError("Status could not be updated.");
     }
   }
 
-  async function handleSend(message: string, attachments: CommentAttachment[]) {
-    if (!ticket) return;
+  async function sendComment(message: string, attachments: CommentAttachment[], retryCommentId?: number) {
+    if (!ticket || !user) return;
     setMessageError("");
     setSubmittingComment(true);
+    const tempId = retryCommentId || -Date.now();
+    const optimisticComment: Comment = {
+      id: tempId,
+      attachments,
+      author: user,
+      created_at: new Date().toISOString(),
+      delivery_status: "sending",
+      message
+    };
+
+    setTicket((current) => {
+      if (!current) return current;
+      const currentComments = current.comments || [];
+      const nextComments = retryCommentId
+        ? currentComments.map((comment) => (comment.id === retryCommentId ? optimisticComment : comment))
+        : [...currentComments, optimisticComment];
+      return { ...current, comments: nextComments, updated_at: optimisticComment.created_at };
+    });
+
     try {
-      await ticketApi.agentAddComment(ticket.id, message, attachments);
-      await loadTicket();
+      const savedComment = await ticketApi.agentAddComment(ticket.id, message, attachments);
+      setTicket((current) => {
+        if (!current) return current;
+        return {
+          ...current,
+          comments: (current.comments || []).map((comment) => (comment.id === tempId ? savedComment : comment)),
+          updated_at: savedComment.created_at
+        };
+      });
+      await refetchTicket();
     } catch {
+      setTicket((current) => {
+        if (!current) return current;
+        return {
+          ...current,
+          comments: (current.comments || []).map((comment) =>
+            comment.id === tempId ? { ...comment, delivery_status: "failed" } : comment
+          )
+        };
+      });
       setMessageError("Message could not be sent.");
       throw new Error("Message could not be sent.");
     } finally {
       setSubmittingComment(false);
     }
+  }
+
+  async function handleSend(message: string, attachments: CommentAttachment[]) {
+    await sendComment(message, attachments);
+  }
+
+  async function handleRetryComment(comment: Comment) {
+    await sendComment(comment.message, comment.attachments || [], comment.id);
   }
 
   async function handleReassignment(event: FormEvent<HTMLFormElement>) {
@@ -87,16 +144,16 @@ export default function AgentTicketDetails() {
     try {
       await ticketApi.agentRequestReassignment(ticket.id, reason);
       setReason("");
-      setNotice("Reassignment request sent to admins.");
+      setNotice("Handover request sent to the Placement Head.");
     } catch {
-      setActionError("Reassignment request could not be submitted.");
+      setActionError("Handover request could not be submitted.");
     } finally {
       setSubmittingRequest(false);
     }
   }
 
   if (loading) {
-    return <Card className="p-6 text-sm text-[#A7A29A]">Loading ticket...</Card>;
+    return <Card className="p-6 text-sm app-text-muted">Loading query...</Card>;
   }
 
   if (!ticket) {
@@ -107,8 +164,8 @@ export default function AgentTicketDetails() {
             Back to Tickets
           </Link>
         }
-        description="This ticket may have been reassigned or removed."
-        title="Ticket not found"
+        description="This query may have been handed over or removed."
+        title="Query not found"
       />
     );
   }
@@ -122,12 +179,12 @@ export default function AgentTicketDetails() {
         Back
       </Link>
 
-      <div className="grid gap-5 xl:grid-cols-[360px_minmax(0,1fr)]">
-        <TicketMetaSidebar customerLabel="Requester" ticket={ticket}>
+      <div className="grid items-start gap-5 xl:grid-cols-[360px_minmax(0,1fr)]">
+        <TicketMetaSidebar customerLabel="Student" ticket={ticket}>
           <Card className="p-4">
             <div className="flex items-center gap-2 text-accent-400">
               <PixelIcon name="settings" size={21} />
-              <h2 className="text-xs font-black uppercase text-[#F5F1EA]">Ticket controls</h2>
+              <h2 className="text-xs font-black uppercase app-text-primary">Query controls</h2>
             </div>
             <label className="label mt-4" htmlFor="status">
               Status
@@ -139,21 +196,21 @@ export default function AgentTicketDetails() {
                 </option>
               ))}
             </Select>
-            {ticket.resolved_at && <p className="mt-3 text-xs text-[#A7A29A]">Resolved {formatDateTime(ticket.resolved_at)}</p>}
+            {ticket.resolved_at && <p className="mt-3 text-xs app-text-muted">Resolved {formatDateTime(ticket.resolved_at)}</p>}
           </Card>
 
           <Card className="p-4">
             <form onSubmit={handleReassignment}>
               <div className="flex items-center gap-2">
                 <PixelIcon className="text-accent-400" name="repeat" size={21} />
-                <h2 className="text-xs font-black uppercase text-[#F5F1EA]">Request reassignment</h2>
+                <h2 className="text-xs font-black uppercase app-text-primary">Request faculty handover</h2>
               </div>
               <Textarea
                 className="mt-4 min-h-28 resize-y"
                 minLength={5}
                 value={reason}
                 onChange={(event) => setReason(event.target.value)}
-                placeholder="Explain why another agent should take this ticket..."
+                placeholder="Explain why another faculty coordinator should take this query..."
                 required
               />
               <Button className="mt-4 w-full" disabled={submittingRequest} type="submit">
@@ -167,8 +224,8 @@ export default function AgentTicketDetails() {
             <Card
               className={`p-4 text-sm ${
                 actionError
-                  ? "border-red-500/25 bg-red-500/10 text-red-200"
-                  : "border-emerald-500/25 bg-emerald-500/10 text-emerald-200"
+                  ? "border-red-200 bg-red-50 text-red-700 dark:border-red-500/25 dark:bg-red-500/10 dark:text-red-300"
+                  : "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/25 dark:bg-emerald-500/10 dark:text-emerald-300"
               }`}
             >
               {actionError || notice}
@@ -180,10 +237,12 @@ export default function AgentTicketDetails() {
           comments={ticket.comments || []}
           currentUser={user}
           error={messageError}
+          onRetryComment={handleRetryComment}
           onSend={handleSend}
           submitting={submittingComment}
-          subtitle="Use quick replies, attachments, and status context to keep the customer moving."
-          title={`Ticket #${ticket.id}`}
+          subtitle="Use quick replies, attachments, and status context to keep the student moving."
+          syncing={syncing}
+          title={`Query #${ticket.id}`}
         />
       </div>
     </div>

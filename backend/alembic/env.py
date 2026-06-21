@@ -5,7 +5,7 @@ from sqlalchemy import engine_from_config, pool
 
 from app.core.config import normalize_database_url, settings
 from app.db.base import Base
-from app.models import assignment_request, comment, ticket, user  # noqa: F401
+from app.models import assignment_request, comment, notification, ticket, user  # noqa: F401
 
 
 config = context.config

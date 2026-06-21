@@ -61,7 +61,7 @@ export default function AdminReassignmentRequests() {
       });
       await loadRequests();
     } catch {
-      setError("Reassignment request could not be updated.");
+      setError("Faculty handover request could not be updated.");
     }
   }
 
@@ -74,9 +74,9 @@ export default function AdminReassignmentRequests() {
             Refresh
           </Button>
         }
-        description="Review agent handoff requests and reassign approved tickets to another support agent."
-        eyebrow="Admin Reassignments"
-        title="Reassignment Requests"
+        description="Review faculty handover requests and reassign approved queries to another faculty coordinator."
+        eyebrow="Placement Head"
+        title="Faculty Handover Requests"
       />
 
       <Card className="p-4">
@@ -84,8 +84,8 @@ export default function AdminReassignmentRequests() {
           <div className="flex items-center gap-3">
             <PixelIcon className="text-accent-400" name="repeat" size={22} />
             <div>
-              <p className="text-xs font-black uppercase text-[#F5F1EA]">{pendingCount} pending in current view</p>
-              <p className="text-xs text-[#A7A29A]">Approve with a new agent or reject with context.</p>
+              <p className="text-xs font-black uppercase app-text-primary">{pendingCount} pending in current view</p>
+              <p className="text-xs app-text-muted">Approve with a new faculty coordinator or reject with context.</p>
             </div>
           </div>
           <Select
@@ -110,11 +110,11 @@ export default function AdminReassignmentRequests() {
       )}
 
       {loading ? (
-        <Card className="p-5 text-sm text-[#A7A29A]">Loading requests...</Card>
+        <Card className="p-5 text-sm app-text-muted">Loading requests...</Card>
       ) : requests.length === 0 ? (
         <EmptyState
-          description="Agent reassignment requests matching the selected status will appear here."
-          title="No reassignment requests"
+          description="Faculty handover requests matching the selected status will appear here."
+          title="No handover requests"
         />
       ) : (
         <div className="grid gap-4">
@@ -124,20 +124,20 @@ export default function AdminReassignmentRequests() {
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <StatusBadge value={request.status} />
-                    <span className="text-xs text-[#A7A29A]">{formatDateTime(request.created_at)}</span>
+                    <span className="text-xs app-text-muted">{formatDateTime(request.created_at)}</span>
                   </div>
-                  <h2 className="mt-3 text-lg font-black uppercase text-[#F5F1EA]">
-                    {request.ticket?.title || `Ticket #${request.ticket_id}`}
+                  <h2 className="mt-3 text-lg font-black uppercase app-text-primary">
+                    {request.ticket?.title || `Query #${request.ticket_id}`}
                   </h2>
-                  <p className="mt-2 flex flex-wrap items-center gap-2 text-sm text-[#A7A29A]">
+                  <p className="mt-2 flex flex-wrap items-center gap-2 text-sm app-text-muted">
                     <Avatar size="sm" user={request.requested_by} />
                     <span>Requested by {request.requested_by.full_name}</span>
-                    {request.current_assignee ? `, current assignee ${request.current_assignee.full_name}` : ""}
+                    {request.current_assignee ? `, current faculty coordinator ${request.current_assignee.full_name}` : ""}
                   </p>
-                  <p className="mt-4 whitespace-pre-wrap text-sm leading-6 text-[#F5F1EA]">{request.reason}</p>
+                  <p className="mt-4 whitespace-pre-wrap text-sm leading-6 app-text-primary">{request.reason}</p>
                 </div>
                 <Link className={buttonClassName({ className: "shrink-0", size: "sm", variant: "secondary" })} to={`/tickets/${request.ticket_id}`}>
-                  View Ticket
+                  Open Query
                 </Link>
               </div>
 
@@ -154,7 +154,7 @@ export default function AdminReassignmentRequests() {
                     onChange={(event) => setSelectedAgents((current) => ({ ...current, [request.id]: event.target.value }))}
                     required
                   >
-                    <option value="">New assignee</option>
+                    <option value="">New faculty coordinator</option>
                     {agents.map((agent) => (
                       <option key={agent.id} value={agent.id}>
                         {agent.full_name} ({agent.active_ticket_count} active)
@@ -165,7 +165,7 @@ export default function AdminReassignmentRequests() {
                     className="min-h-10 resize-y py-2"
                     value={responses[request.id] || ""}
                     onChange={(event) => setResponses((current) => ({ ...current, [request.id]: event.target.value }))}
-                    placeholder="Optional admin response"
+                    placeholder="Optional Placement Head response"
                   />
                   <Button type="submit" variant="primary">
                     <PixelIcon name="check" size={18} />
@@ -177,8 +177,8 @@ export default function AdminReassignmentRequests() {
                   </Button>
                 </form>
               ) : (
-                <div className="mt-5 rounded-sm border border-white/10 bg-white/[0.04] p-3 text-sm text-[#A7A29A]">
-                  {request.admin_response || "No admin response recorded."}
+                <div className="app-card-muted mt-5 p-3 text-sm app-text-muted">
+                  {request.admin_response || "No Placement Head response recorded."}
                 </div>
               )}
             </Card>

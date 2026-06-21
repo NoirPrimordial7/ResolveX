@@ -7,7 +7,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="premium-pattern min-h-screen w-full text-[#F5F1EA] transition-colors">
+    <div className="app-page">
       <Topbar onMenuClick={() => setSidebarOpen(true)} />
       <main className="flex w-full flex-col gap-4 px-4 py-4 sm:px-5 lg:flex-row lg:gap-5 lg:px-5 lg:py-5 xl:px-6">
         <Sidebar mobileOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />

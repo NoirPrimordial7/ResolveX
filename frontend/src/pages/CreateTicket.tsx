@@ -12,18 +12,18 @@ import { categories, priorities } from "../types";
 import { cn } from "../utils/cn";
 
 const categoryDescriptions: Record<TicketCategory, string> = {
-  Technical: "Bugs, outages, integrations, and product behavior.",
-  Billing: "Invoices, subscriptions, renewals, and payment issues.",
-  Account: "Login, permissions, profile, and workspace access.",
-  General: "Questions that need support team guidance.",
+  Technical: "Portal, registration, resume upload, and drive access issues.",
+  Billing: "Fee receipts, offer paperwork, stipend details, or reimbursement questions.",
+  Account: "Login, permissions, student profile, and placement portal access.",
+  General: "Questions that need faculty or placement cell guidance.",
   Other: "Anything that does not fit the standard categories."
 };
 
 const priorityDescriptions: Record<TicketPriority, string> = {
   Low: "Informational or non-blocking request.",
-  Medium: "Important, but work can continue.",
-  High: "Blocking a workflow or key customer task.",
-  Urgent: "Critical issue requiring immediate attention."
+  Medium: "Important, but the placement process can continue.",
+  High: "Blocking a drive registration, document check, or interview step.",
+  Urgent: "Placement deadline or interview issue requiring immediate attention."
 };
 
 export default function CreateTicket() {
@@ -43,7 +43,7 @@ export default function CreateTicket() {
       const ticket = await ticketApi.createTicket({ title, description, category, priority });
       navigate(`/tickets/${ticket.id}`);
     } catch {
-      setError("Ticket could not be created. Please check the form.");
+      setError("Placement query could not be created. Please check the form.");
     } finally {
       setSubmitting(false);
     }
@@ -52,9 +52,9 @@ export default function CreateTicket() {
   return (
     <div className="space-y-5">
       <PageHeader
-        description="Give the support team enough detail to reproduce the issue and prioritize the response."
-        eyebrow="New Ticket"
-        title="Create Support Ticket"
+        description="Give the placement support desk enough detail to route your query to the right faculty coordinator."
+        eyebrow="New Query"
+        title="Raise Placement Query"
       />
 
       <form onSubmit={handleSubmit}>
@@ -63,15 +63,15 @@ export default function CreateTicket() {
             <div className="space-y-6">
               <div>
                 <label className="label" htmlFor="title">
-                  Ticket title
+                  Query title
                 </label>
-                <p className="mt-1 text-sm text-[#A7A29A]">Use a short summary of the issue or request.</p>
+                <p className="mt-1 text-sm app-text-muted">Use a short summary of the placement issue or request.</p>
                 <Input
                   className="mt-2"
                   id="title"
                   maxLength={180}
                   minLength={3}
-                  placeholder="Example: Cannot access billing dashboard"
+                  placeholder="Example: Resume upload failing for campus drive"
                   value={title}
                   onChange={(event) => setTitle(event.target.value)}
                   required
@@ -82,14 +82,14 @@ export default function CreateTicket() {
                 <label className="label" htmlFor="description">
                   Description
                 </label>
-                <p className="mt-1 text-sm text-[#A7A29A]">
-                  Include steps taken, expected behavior, screenshots context, or affected users.
+                <p className="mt-1 text-sm app-text-muted">
+                  Include the company name, drive date, registration ID, steps tried, and any screenshot context.
                 </p>
                 <Textarea
                   className="mt-2 min-h-44 resize-y"
                   id="description"
                   minLength={10}
-                  placeholder="Describe what happened and what you need help with..."
+                  placeholder="Describe the placement query and what you need help with..."
                   value={description}
                   onChange={(event) => setDescription(event.target.value)}
                   required
@@ -99,7 +99,7 @@ export default function CreateTicket() {
               <div>
                 <div className="flex items-center gap-2">
                   <PixelIcon className="text-accent-400" name="list" size={20} />
-                  <h2 className="text-xs font-black uppercase text-[#F5F1EA]">Category</h2>
+                  <h2 className="text-xs font-black uppercase app-text-primary">Category</h2>
                 </div>
                 <div className="mt-3 grid gap-3 sm:grid-cols-2">
                   {categories.map((item) => (
@@ -108,14 +108,14 @@ export default function CreateTicket() {
                       className={cn(
                         "rounded-sm border p-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/25",
                         category === item
-                          ? "border-accent-500/35 bg-accent-500/10 text-accent-100"
-                          : "border-white/10 bg-white/[0.03] text-[#F5F1EA] hover:border-white/20 hover:bg-white/[0.06]"
+                          ? "border-accent-500/35 bg-accent-500/10 text-orange-700 dark:text-accent-100"
+                          : "border-orange-200/80 bg-orange-50/70 text-stone-950 hover:border-accent-500/35 hover:bg-accent-500/10 dark:border-white/10 dark:bg-white/[0.03] dark:text-[#F5F1EA] dark:hover:border-white/20 dark:hover:bg-white/[0.06]"
                       )}
                       onClick={() => setCategory(item)}
                       type="button"
                     >
                       <span className="block text-sm font-semibold">{item}</span>
-                      <span className="mt-1 block text-xs leading-5 text-[#A7A29A]">{categoryDescriptions[item]}</span>
+                      <span className="mt-1 block text-xs leading-5 app-text-muted">{categoryDescriptions[item]}</span>
                     </button>
                   ))}
                 </div>
@@ -124,7 +124,7 @@ export default function CreateTicket() {
               <div>
                 <div className="flex items-center gap-2">
                   <PixelIcon className="text-accent-400" name="alert" size={20} />
-                  <h2 className="text-xs font-black uppercase text-[#F5F1EA]">Priority</h2>
+                  <h2 className="text-xs font-black uppercase app-text-primary">Priority</h2>
                 </div>
                 <div className="mt-3 grid gap-3 sm:grid-cols-2">
                   {priorities.map((item) => (
@@ -133,43 +133,43 @@ export default function CreateTicket() {
                       className={cn(
                         "rounded-sm border p-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/25",
                         priority === item
-                          ? "border-accent-500/35 bg-accent-500/10 text-accent-100"
-                          : "border-white/10 bg-white/[0.03] text-[#F5F1EA] hover:border-white/20 hover:bg-white/[0.06]"
+                          ? "border-accent-500/35 bg-accent-500/10 text-orange-700 dark:text-accent-100"
+                          : "border-orange-200/80 bg-orange-50/70 text-stone-950 hover:border-accent-500/35 hover:bg-accent-500/10 dark:border-white/10 dark:bg-white/[0.03] dark:text-[#F5F1EA] dark:hover:border-white/20 dark:hover:bg-white/[0.06]"
                       )}
                       onClick={() => setPriority(item)}
                       type="button"
                     >
                       <span className="block text-sm font-semibold">{item}</span>
-                      <span className="mt-1 block text-xs leading-5 text-[#A7A29A]">{priorityDescriptions[item]}</span>
+                      <span className="mt-1 block text-xs leading-5 app-text-muted">{priorityDescriptions[item]}</span>
                     </button>
                   ))}
                 </div>
               </div>
 
               {error && (
-                <p className="rounded-sm border border-red-500/25 bg-red-500/10 p-3 text-sm text-red-200">
+                <p className="app-alert-error">
                   {error}
                 </p>
               )}
 
               <Button className="w-full sm:w-auto" disabled={submitting} type="submit" variant="primary">
                 <PixelIcon name="send" size={18} />
-                {submitting ? "Submitting..." : "Submit Ticket"}
+                {submitting ? "Submitting..." : "Submit Query"}
               </Button>
             </div>
           </Card>
 
-          <Card className="h-fit bg-[#111111]/92 p-5">
+          <Card className="h-fit p-5">
             <PixelIcon className="text-accent-400" name="chat" size={26} />
-            <h2 className="display-type mt-4 text-3xl leading-none text-[#F5F1EA]">Helpful ticket details</h2>
-            <div className="mt-4 space-y-4 text-sm leading-6 text-[#A7A29A]">
-              <p>Include the exact page, account, or workflow where the issue happens.</p>
-              <p>Mention whether this blocks work for one user, many users, or an entire team.</p>
-              <p>Keep sensitive data out of the description unless support explicitly requests it.</p>
+            <h2 className="display-type mt-4 text-3xl leading-none app-text-primary">Helpful query details</h2>
+            <div className="mt-4 space-y-4 text-sm leading-6 app-text-muted">
+              <p>Include the company, drive name, deadline, registration ID, or document involved.</p>
+              <p>Mention whether this blocks registration, eligibility verification, or an interview schedule.</p>
+              <p>Keep sensitive data out of the description unless a faculty coordinator explicitly requests it.</p>
             </div>
-            <div className="mt-5 rounded-sm border border-white/10 bg-white/[0.04] p-3 text-xs text-[#A7A29A]">
-              Selected: <span className="font-black uppercase text-[#F5F1EA]">{category}</span> -{" "}
-              <span className="font-black uppercase text-[#F5F1EA]">{priority}</span>
+            <div className="mt-5 rounded-sm border border-orange-200/80 bg-orange-50/70 p-3 text-xs app-text-muted dark:border-white/10 dark:bg-white/[0.04]">
+              Selected: <span className="font-black uppercase app-text-primary">{category}</span> -{" "}
+              <span className="font-black uppercase app-text-primary">{priority}</span>
             </div>
           </Card>
         </div>

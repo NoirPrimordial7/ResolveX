@@ -9,9 +9,9 @@ import ThemeToggle from "../components/ThemeToggle";
 import { useAuth } from "../context/AuthContext";
 
 const demoAccounts = [
-  { label: "Admin", email: "admin@resolvex.com", password: "Admin@123" },
-  { label: "Agent", email: "agent@resolvex.com", password: "Agent@123" },
-  { label: "Customer", email: "customer@resolvex.com", password: "Customer@123" }
+  { label: "Placement Head", email: "admin@resolvex.com", password: "Admin@123" },
+  { label: "Faculty Coordinator", email: "agent@resolvex.com", password: "Agent@123" },
+  { label: "Student", email: "customer@resolvex.com", password: "Customer@123" }
 ];
 
 function defaultRouteForRole(role: string) {
@@ -47,13 +47,13 @@ export default function Login() {
   }
 
   return (
-    <div className="premium-pattern min-h-screen text-[#F5F1EA] transition-colors">
+    <div className="app-page">
       <div className="absolute right-4 top-4 z-10">
         <ThemeToggle />
       </div>
 
       <main className="mx-auto grid min-h-screen w-full max-w-7xl gap-8 px-4 py-20 sm:px-6 lg:grid-cols-[1.08fr_0.92fr] lg:px-8 lg:py-6">
-        <section className="relative flex min-h-[44vh] flex-col justify-between overflow-hidden border border-white/10 bg-[#0B0B0A]/84 p-6 shadow-2xl shadow-black/35 lg:min-h-[calc(100vh-3rem)] lg:p-8">
+        <section className="app-surface relative flex min-h-[44vh] flex-col justify-between overflow-hidden p-6 lg:min-h-[calc(100vh-3rem)] lg:p-8">
           <div className="pointer-events-none absolute inset-0 chat-pattern opacity-70" />
           <div className="relative z-[1]">
             <div className="flex items-center gap-3">
@@ -62,32 +62,32 @@ export default function Login() {
               </div>
               <div>
                 <p className="display-type text-3xl leading-none">ResolveX</p>
-                <p className="text-[11px] font-black uppercase text-[#A7A29A]">Support operations</p>
+                <p className="text-[11px] font-black uppercase app-text-muted">Placement Support Desk</p>
               </div>
             </div>
 
             <div className="mt-16 max-w-2xl lg:mt-24">
               <p className="eyebrow">
-                Support operations
+                Campus Placement Support
               </p>
-              <h1 className="display-type mt-6 text-6xl leading-[0.88] text-[#F5F1EA] sm:text-7xl xl:text-8xl">
-                Resolve Tickets.
+              <h1 className="display-type mt-6 text-6xl leading-[0.88] app-text-primary sm:text-7xl xl:text-8xl">
+                Resolve Queries.
                 <br />
-                Assign Fast.
+                Assign Faculty.
                 <br />
                 Close Clean.
               </h1>
-              <p className="mt-6 max-w-xl text-base leading-7 text-[#A7A29A]">
-                Prioritize queues, assign ownership, and keep every conversation moving from one focused workspace.
+              <p className="mt-6 max-w-xl text-base leading-7 app-text-muted">
+                Prioritize placement queries, assign faculty ownership, and keep every student conversation moving from one focused workspace.
               </p>
             </div>
           </div>
 
           <div className="relative z-[1] mt-10 grid gap-3 sm:grid-cols-3 lg:mt-0">
-            {["Live queue clarity", "Role-aware routing", "Fast replies"].map((item) => (
-              <div key={item} className="border border-white/10 bg-white/[0.04] p-4">
+            {["Live query clarity", "Role-aware routing", "Faculty replies"].map((item) => (
+              <div key={item} className="app-card-muted p-4">
                 <PixelIcon className="mb-3 text-accent-400" name="check" size={20} />
-                <p className="text-xs font-black uppercase text-[#F5F1EA]">{item}</p>
+                <p className="text-xs font-black uppercase app-text-primary">{item}</p>
               </div>
             ))}
           </div>
@@ -100,9 +100,9 @@ export default function Login() {
                 <PixelIcon name="shield" size={30} />
               </div>
               <p className="eyebrow">Welcome back</p>
-              <h1 className="display-type mt-4 text-5xl leading-none text-[#F5F1EA]">Sign in</h1>
-              <p className="mt-3 text-sm leading-6 text-[#A7A29A]">
-                Manage support tickets with a focused admin-grade workspace.
+              <h1 className="display-type mt-4 text-5xl leading-none app-text-primary">Sign in</h1>
+              <p className="mt-3 text-sm leading-6 app-text-muted">
+                Manage placement support queries with a focused campus desk workspace.
               </p>
             </div>
 
@@ -114,7 +114,7 @@ export default function Login() {
                       Email
                     </label>
                     <div className="relative mt-2">
-                      <PixelIcon className="pointer-events-none absolute left-3 top-2.5 text-[#726D66]" name="mail" size={20} />
+                      <PixelIcon className="pointer-events-none absolute left-3 top-2.5 app-text-subtle" name="mail" size={20} />
                       <Input
                         className="pl-10"
                         id="email"
@@ -131,7 +131,7 @@ export default function Login() {
                       Password
                     </label>
                     <div className="relative mt-2">
-                      <PixelIcon className="pointer-events-none absolute left-3 top-2.5 text-[#726D66]" name="lock" size={20} />
+                      <PixelIcon className="pointer-events-none absolute left-3 top-2.5 app-text-subtle" name="lock" size={20} />
                       <Input
                         className="pl-10"
                         id="password"
@@ -144,7 +144,7 @@ export default function Login() {
                   </div>
 
                   {error && (
-                    <p className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-500/25 dark:bg-red-500/10 dark:text-red-300">
+                    <p className="app-alert-error">
                       {error}
                     </p>
                   )}
@@ -155,8 +155,8 @@ export default function Login() {
                   </Button>
                 </div>
 
-                <p className="mt-6 text-center text-sm text-[#A7A29A]">
-                  New customer?{" "}
+                <p className="mt-6 text-center text-sm app-text-muted">
+                  New student?{" "}
                   <Link className="font-semibold text-accent-400 hover:text-accent-300" to="/register">
                     Create account
                   </Link>
@@ -165,12 +165,12 @@ export default function Login() {
             </Card>
 
             <Card className="mt-4 p-4">
-              <p className="text-xs font-black uppercase text-[#F5F1EA]">Demo credentials</p>
+              <p className="text-xs font-black uppercase app-text-primary">Demo credentials</p>
               <div className="mt-3 grid gap-2">
                 {demoAccounts.map((account) => (
                   <button
                     key={account.email}
-                    className="flex items-center justify-between gap-3 rounded-sm border border-white/10 bg-[#0B0B0A]/70 px-3 py-2 text-left text-sm transition hover:border-accent-500/45 hover:bg-accent-500/10"
+                    className="flex items-center justify-between gap-3 rounded-sm border border-orange-200/80 bg-orange-50/70 px-3 py-2 text-left text-sm transition hover:border-accent-500/45 hover:bg-accent-500/10 dark:border-white/10 dark:bg-[#0B0B0A]/70"
                     onClick={() => {
                       setEmail(account.email);
                       setPassword(account.password);
@@ -178,8 +178,8 @@ export default function Login() {
                     type="button"
                   >
                     <span>
-                      <span className="block text-xs font-black uppercase text-[#F5F1EA]">{account.label}</span>
-                      <span className="block font-mono text-xs text-[#A7A29A]">
+                      <span className="block text-xs font-black uppercase app-text-primary">{account.label}</span>
+                      <span className="block font-mono text-xs app-text-muted">
                         {account.email} -- {account.password}
                       </span>
                     </span>

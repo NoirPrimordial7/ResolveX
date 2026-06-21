@@ -87,10 +87,10 @@ def change_ticket_status(
     ticket_id: int,
     payload: TicketStatusUpdate,
     db: Session = Depends(get_db),
-    _: User = Depends(require_admin),
+    current_user: User = Depends(require_admin),
 ):
     ticket = get_ticket_or_404(db, ticket_id)
-    return update_ticket_status(db, ticket, payload.status)
+    return update_ticket_status(db, ticket, current_user, payload.status)
 
 
 @router.patch("/tickets/{ticket_id}/assign", response_model=TicketRead)
@@ -98,10 +98,10 @@ def assign_ticket_to_admin(
     ticket_id: int,
     payload: TicketAssignUpdate,
     db: Session = Depends(get_db),
-    _: User = Depends(require_admin),
+    current_user: User = Depends(require_admin),
 ):
     ticket = get_ticket_or_404(db, ticket_id)
-    return assign_ticket(db, ticket, payload.assigned_to_id)
+    return assign_ticket(db, ticket, current_user, payload.assigned_to_id)
 
 
 @router.patch("/tickets/{ticket_id}/reassign", response_model=TicketRead)
@@ -109,10 +109,10 @@ def reassign_ticket_to_agent(
     ticket_id: int,
     payload: TicketReassignUpdate,
     db: Session = Depends(get_db),
-    _: User = Depends(require_admin),
+    current_user: User = Depends(require_admin),
 ):
     ticket = get_ticket_or_404(db, ticket_id)
-    return reassign_ticket(db, ticket, payload.assigned_to_id)
+    return reassign_ticket(db, ticket, current_user, payload.assigned_to_id)
 
 
 @router.patch("/tickets/{ticket_id}/priority", response_model=TicketRead)
@@ -120,10 +120,10 @@ def change_ticket_priority(
     ticket_id: int,
     payload: TicketPriorityUpdate,
     db: Session = Depends(get_db),
-    _: User = Depends(require_admin),
+    current_user: User = Depends(require_admin),
 ):
     ticket = get_ticket_or_404(db, ticket_id)
-    return update_ticket_priority(db, ticket, payload.priority)
+    return update_ticket_priority(db, ticket, current_user, payload.priority)
 
 
 @router.get("/reassignment-requests", response_model=list[ReassignmentRequestRead])
@@ -140,7 +140,7 @@ def admin_resolve_reassignment_request(
     request_id: int,
     payload: ReassignmentRequestDecision,
     db: Session = Depends(get_db),
-    _: User = Depends(require_admin),
+    current_user: User = Depends(require_admin),
 ):
     request = get_reassignment_request_or_404(db, request_id)
-    return resolve_reassignment_request(db, request, payload)
+    return resolve_reassignment_request(db, request, payload, current_user)

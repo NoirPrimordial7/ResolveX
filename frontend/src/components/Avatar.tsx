@@ -10,6 +10,13 @@ const sizeClasses: Record<AvatarSize, string> = {
   xl: "h-20 w-20 text-2xl"
 };
 
+const roleColorClasses = {
+  admin: "border-accent-500/35 bg-[linear-gradient(135deg,#FF4B24,#D93618)] text-[#0B0B0A]",
+  customer: "border-sky-500/35 bg-[linear-gradient(135deg,#38BDF8,#0EA5E9)] text-[#0B0B0A]",
+  support_agent: "border-emerald-500/35 bg-[linear-gradient(135deg,#34D399,#10B981)] text-[#0B0B0A]",
+  fallback: "border-accent-500/35 bg-[linear-gradient(135deg,#FF4B24,#D93618)] text-[#0B0B0A]"
+};
+
 function initials(name?: string | null) {
   if (!name) return "RX";
   const parts = name
@@ -22,7 +29,7 @@ function initials(name?: string | null) {
 }
 
 interface AvatarProps {
-  user?: Pick<User, "avatar_url" | "email" | "full_name" | "name"> | null;
+  user?: (Pick<User, "avatar_url" | "email" | "full_name" | "name"> & { role?: User["role"] }) | null;
   label?: string;
   size?: AvatarSize;
   className?: string;
@@ -34,7 +41,8 @@ export default function Avatar({ className, label, size = "md", user }: AvatarPr
   return (
     <span
       className={cn(
-        "inline-flex shrink-0 items-center justify-center overflow-hidden rounded-sm border border-accent-500/35 bg-[linear-gradient(135deg,#FF4B24,#D93618)] font-black uppercase text-[#0B0B0A] shadow-glow",
+        "inline-flex shrink-0 items-center justify-center overflow-hidden rounded-xl border font-black uppercase shadow-[0_10px_24px_rgba(255,75,36,0.18)] dark:rounded-sm dark:shadow-glow",
+        roleColorClasses[user?.role || "fallback"],
         sizeClasses[size],
         className
       )}

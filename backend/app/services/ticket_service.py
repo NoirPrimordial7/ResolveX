@@ -11,10 +11,12 @@ from app.models.ticket import Ticket, TicketCategory, TicketPriority, TicketStat
 from app.models.user import User, UserRole
 from app.schemas.comment import CommentCreate
 from app.schemas.ticket import ReassignmentRequestCreate, ReassignmentRequestDecision, TicketCreate
+from app.services.notification_service import create_notifications
 
 
 ACTIVE_STATUSES = (TicketStatus.OPEN, TicketStatus.IN_PROGRESS)
 AGENT_ALLOWED_STATUSES = (TicketStatus.IN_PROGRESS, TicketStatus.RESOLVED)
+HIGH_ATTENTION_PRIORITIES = (TicketPriority.HIGH, TicketPriority.URGENT)
 
 
 def _now() -> datetime:
@@ -43,6 +45,378 @@ def _ticket_count_for_agent(db: Session, agent_id: int, statuses: tuple[TicketSt
     if statuses:
         query = query.where(Ticket.status.in_(statuses))
     return db.scalar(query) or 0
+
+
+def _active_admin_ids(db: Session) -> list[int]:
+    return list(
+        db.scalars(
+            select(User.id).where(
+                User.role == UserRole.ADMIN,
+                User.is_active.is_(True),
+            )
+        ).all()
+    )
+
+
+def _ticket_metadata(ticket: Ticket, actor: User | None = None, extra: dict[str, object] | None = None) -> dict[str, object]:
+    metadata: dict[str, object] = {
+        "action_text": "Open Query",
+        "ticket_title": ticket.title,
+    }
+    if actor:
+        metadata["actor_name"] = actor.full_name
+    if extra:
+        metadata.update(extra)
+    return metadata
+
+
+def _notify(
+    db: Session,
+    *,
+    ticket: Ticket,
+    actor: User | None,
+    target_user_ids: list[int],
+    notification_type: str,
+    title: str,
+    message: str,
+    dedupe_seed: str,
+    metadata: dict[str, object] | None = None,
+) -> None:
+    create_notifications(
+        db,
+        target_user_ids=target_user_ids,
+        actor_id=actor.id if actor else None,
+        ticket_id=ticket.id,
+        notification_type=notification_type,
+        title=title,
+        message=message,
+        dedupe_seed=dedupe_seed,
+        metadata=_ticket_metadata(ticket, actor, metadata),
+    )
+
+
+def _notify_ticket_created(db: Session, ticket: Ticket, actor: User) -> None:
+    seed = f"created:{ticket.id}"
+    if ticket.assigned_to_id:
+        _notify(
+            db,
+            ticket=ticket,
+            actor=actor,
+            target_user_ids=[ticket.assigned_to_id],
+            notification_type="ticket_created",
+            title="New student ticket assigned to you",
+            message=f"New student ticket assigned to you: {ticket.title}",
+            dedupe_seed=seed,
+        )
+
+    if ticket.assigned_to_id is None or ticket.priority in HIGH_ATTENTION_PRIORITIES:
+        title = "New urgent ticket needs attention" if ticket.priority in HIGH_ATTENTION_PRIORITIES else "New placement support ticket created"
+        _notify(
+            db,
+            ticket=ticket,
+            actor=actor,
+            target_user_ids=_active_admin_ids(db),
+            notification_type="ticket_created",
+            title=title,
+            message=f"{actor.full_name} raised a placement support query: {ticket.title}",
+            dedupe_seed=seed,
+            metadata={"priority": ticket.priority.value},
+        )
+
+
+def _notify_assignment_changed(
+    db: Session,
+    ticket: Ticket,
+    actor: User,
+    old_assignee_id: int | None,
+    new_assignee: User | None,
+    event_time: datetime,
+) -> None:
+    if old_assignee_id == ticket.assigned_to_id:
+        return
+
+    seed = f"assignment:{ticket.assigned_to_id or 'none'}:{event_time.isoformat()}"
+    if new_assignee:
+        _notify(
+            db,
+            ticket=ticket,
+            actor=actor,
+            target_user_ids=[new_assignee.id],
+            notification_type="assignment_changed",
+            title="You have been assigned a new student ticket",
+            message=f"You have been assigned a student ticket: {ticket.title}",
+            dedupe_seed=seed,
+            metadata={"assigned_to": new_assignee.full_name},
+        )
+        _notify(
+            db,
+            ticket=ticket,
+            actor=actor,
+            target_user_ids=[ticket.created_by_id],
+            notification_type="assignment_changed",
+            title="Your ticket has been assigned",
+            message=f"Your ticket has been assigned to {new_assignee.full_name}: {ticket.title}",
+            dedupe_seed=seed,
+            metadata={"assigned_to": new_assignee.full_name},
+        )
+    else:
+        _notify(
+            db,
+            ticket=ticket,
+            actor=actor,
+            target_user_ids=[ticket.created_by_id],
+            notification_type="assignment_changed",
+            title="Your ticket is awaiting a faculty coordinator",
+            message=f"Your ticket is waiting for a faculty coordinator: {ticket.title}",
+            dedupe_seed=seed,
+        )
+
+    if old_assignee_id and old_assignee_id != ticket.assigned_to_id:
+        _notify(
+            db,
+            ticket=ticket,
+            actor=actor,
+            target_user_ids=[old_assignee_id],
+            notification_type="assignment_changed",
+            title="Ticket reassigned away from you",
+            message=f"Ticket reassigned away from you: {ticket.title}",
+            dedupe_seed=seed,
+        )
+
+
+def _notify_comment_added(db: Session, ticket: Ticket, comment: Comment, actor: User) -> None:
+    seed = f"comment:{comment.id}"
+    if actor.role == UserRole.CUSTOMER:
+        if ticket.assigned_to_id:
+            _notify(
+                db,
+                ticket=ticket,
+                actor=actor,
+                target_user_ids=[ticket.assigned_to_id],
+                notification_type="comment_added",
+                title="Student replied on your assigned ticket",
+                message=f"Student replied on your assigned ticket: {ticket.title}",
+                dedupe_seed=seed,
+                metadata={"comment_id": comment.id},
+            )
+        if ticket.assigned_to_id is None or ticket.priority in HIGH_ATTENTION_PRIORITIES:
+            _notify(
+                db,
+                ticket=ticket,
+                actor=actor,
+                target_user_ids=_active_admin_ids(db),
+                notification_type="comment_added",
+                title="Student reply needs placement cell attention",
+                message=f"{actor.full_name} replied on an urgent or unassigned ticket: {ticket.title}",
+                dedupe_seed=seed,
+                metadata={"comment_id": comment.id, "priority": ticket.priority.value},
+            )
+        return
+
+    if actor.role == UserRole.SUPPORT_AGENT:
+        _notify(
+            db,
+            ticket=ticket,
+            actor=actor,
+            target_user_ids=[ticket.created_by_id],
+            notification_type="comment_added",
+            title="Faculty replied to your ticket",
+            message=f"Faculty replied to your ticket: {ticket.title}",
+            dedupe_seed=seed,
+            metadata={"comment_id": comment.id},
+        )
+        return
+
+    if actor.role == UserRole.ADMIN:
+        _notify(
+            db,
+            ticket=ticket,
+            actor=actor,
+            target_user_ids=[ticket.created_by_id],
+            notification_type="comment_added",
+            title="Placement Head replied to your ticket",
+            message=f"Placement Head replied to your ticket: {ticket.title}",
+            dedupe_seed=seed,
+            metadata={"comment_id": comment.id},
+        )
+
+
+def _notify_status_changed(
+    db: Session,
+    ticket: Ticket,
+    actor: User,
+    old_status: TicketStatus,
+    event_time: datetime,
+) -> None:
+    if old_status == ticket.status:
+        return
+
+    seed = f"status:{ticket.status.value}:{event_time.isoformat()}"
+    if ticket.status == TicketStatus.RESOLVED:
+        _notify(
+            db,
+            ticket=ticket,
+            actor=actor,
+            target_user_ids=[ticket.created_by_id],
+            notification_type="status_changed",
+            title="Your ticket has been marked resolved",
+            message=f"Your ticket has been marked resolved: {ticket.title}",
+            dedupe_seed=seed,
+            metadata={"status": ticket.status.value},
+        )
+        if ticket.priority in HIGH_ATTENTION_PRIORITIES:
+            _notify(
+                db,
+                ticket=ticket,
+                actor=actor,
+                target_user_ids=_active_admin_ids(db),
+                notification_type="status_changed",
+                title="High-priority ticket resolved",
+                message=f"A {ticket.priority.value.lower()} placement ticket was marked resolved: {ticket.title}",
+                dedupe_seed=seed,
+                metadata={"status": ticket.status.value, "priority": ticket.priority.value},
+            )
+    else:
+        _notify(
+            db,
+            ticket=ticket,
+            actor=actor,
+            target_user_ids=[ticket.created_by_id],
+            notification_type="status_changed",
+            title=f"Your ticket status changed to {ticket.status.value}",
+            message=f"Your ticket status changed to {ticket.status.value}: {ticket.title}",
+            dedupe_seed=seed,
+            metadata={"status": ticket.status.value},
+        )
+
+    if actor.role == UserRole.ADMIN and ticket.assigned_to_id:
+        _notify(
+            db,
+            ticket=ticket,
+            actor=actor,
+            target_user_ids=[ticket.assigned_to_id],
+            notification_type="status_changed",
+            title=f"Ticket status changed to {ticket.status.value}",
+            message=f"Ticket status changed to {ticket.status.value}: {ticket.title}",
+            dedupe_seed=seed,
+            metadata={"status": ticket.status.value},
+        )
+
+
+def _notify_priority_changed(
+    db: Session,
+    ticket: Ticket,
+    actor: User,
+    old_priority: TicketPriority,
+    event_time: datetime,
+) -> None:
+    if old_priority == ticket.priority:
+        return
+
+    seed = f"priority:{ticket.priority.value}:{event_time.isoformat()}"
+    if ticket.assigned_to_id:
+        _notify(
+            db,
+            ticket=ticket,
+            actor=actor,
+            target_user_ids=[ticket.assigned_to_id],
+            notification_type="priority_changed",
+            title=f"Ticket priority changed to {ticket.priority.value}",
+            message=f"Ticket priority changed to {ticket.priority.value}: {ticket.title}",
+            dedupe_seed=seed,
+            metadata={"priority": ticket.priority.value},
+        )
+
+    if ticket.priority in HIGH_ATTENTION_PRIORITIES:
+        _notify(
+            db,
+            ticket=ticket,
+            actor=actor,
+            target_user_ids=[ticket.created_by_id],
+            notification_type="priority_changed",
+            title=f"Your ticket was marked {ticket.priority.value}",
+            message=f"Your ticket was marked {ticket.priority.value}: {ticket.title}",
+            dedupe_seed=seed,
+            metadata={"priority": ticket.priority.value},
+        )
+
+
+def _notify_reassignment_requested(db: Session, request: TicketAssignmentRequest, actor: User) -> None:
+    if not request.ticket:
+        return
+    _notify(
+        db,
+        ticket=request.ticket,
+        actor=actor,
+        target_user_ids=_active_admin_ids(db),
+        notification_type="reassignment_requested",
+        title="Faculty handover requested",
+        message=f"Reassignment requested for: {request.ticket.title}",
+        dedupe_seed=f"reassignment-requested:{request.id}",
+        metadata={"reassignment_request_id": request.id},
+    )
+
+
+def _notify_reassignment_decision(
+    db: Session,
+    request: TicketAssignmentRequest,
+    actor: User,
+    new_assignee: User | None,
+) -> None:
+    if not request.ticket:
+        return
+
+    ticket = request.ticket
+    seed = f"reassignment-decision:{request.id}:{request.status.value}"
+    if request.status == AssignmentRequestStatus.APPROVED:
+        _notify(
+            db,
+            ticket=ticket,
+            actor=actor,
+            target_user_ids=[request.requested_by_id],
+            notification_type="reassignment_approved",
+            title="Reassignment request approved",
+            message=f"Your reassignment request was approved: {ticket.title}",
+            dedupe_seed=seed,
+            metadata={"reassignment_request_id": request.id},
+        )
+        if new_assignee:
+            _notify(
+                db,
+                ticket=ticket,
+                actor=actor,
+                target_user_ids=[new_assignee.id],
+                notification_type="assignment_changed",
+                title="You have been assigned a reassigned ticket",
+                message=f"You have been assigned a reassigned ticket: {ticket.title}",
+                dedupe_seed=seed,
+                metadata={"reassignment_request_id": request.id, "assigned_to": new_assignee.full_name},
+            )
+        _notify(
+            db,
+            ticket=ticket,
+            actor=actor,
+            target_user_ids=[ticket.created_by_id],
+            notification_type="assignment_changed",
+            title="Your ticket was moved to another faculty coordinator",
+            message="Your ticket was moved to another faculty coordinator.",
+            dedupe_seed=seed,
+            metadata={"reassignment_request_id": request.id},
+        )
+        return
+
+    if request.status == AssignmentRequestStatus.REJECTED:
+        _notify(
+            db,
+            ticket=ticket,
+            actor=actor,
+            target_user_ids=[request.requested_by_id],
+            notification_type="reassignment_rejected",
+            title="Reassignment request rejected",
+            message=f"Your reassignment request was rejected: {ticket.title}",
+            dedupe_seed=seed,
+            metadata={"reassignment_request_id": request.id},
+        )
 
 
 def get_agent_workload(db: Session) -> list[dict[str, int | str]]:
@@ -92,6 +466,7 @@ def _get_least_loaded_agent(db: Session) -> User | None:
 
 def create_ticket(db: Session, payload: TicketCreate, current_user: User) -> Ticket:
     assignee = _get_least_loaded_agent(db)
+    event_time = _now()
     ticket = Ticket(
         title=payload.title.strip(),
         description=payload.description.strip(),
@@ -100,8 +475,11 @@ def create_ticket(db: Session, payload: TicketCreate, current_user: User) -> Tic
         status=TicketStatus.OPEN,
         created_by_id=current_user.id,
         assigned_to_id=assignee.id if assignee else None,
+        updated_at=event_time,
     )
     db.add(ticket)
+    db.flush()
+    _notify_ticket_created(db, ticket, current_user)
     db.commit()
     db.refresh(ticket)
     return get_ticket_or_404(db, ticket.id)
@@ -177,6 +555,7 @@ def get_agent_dashboard(db: Session, current_user: User) -> tuple[dict[str, int]
 
 
 def add_comment(db: Session, ticket: Ticket, payload: CommentCreate, current_user: User) -> Comment:
+    event_time = _now()
     attachments = [attachment.model_dump() for attachment in payload.attachments]
     comment = Comment(
         message=payload.message.strip(),
@@ -184,7 +563,11 @@ def add_comment(db: Session, ticket: Ticket, payload: CommentCreate, current_use
         ticket_id=ticket.id,
         author_id=current_user.id,
     )
+    ticket.updated_at = event_time
     db.add(comment)
+    db.add(ticket)
+    db.flush()
+    _notify_comment_added(db, ticket, comment, current_user)
     db.commit()
     db.refresh(comment)
     return db.scalar(select(Comment).options(selectinload(Comment.author)).where(Comment.id == comment.id))
@@ -280,8 +663,12 @@ def _apply_status_transition(ticket: Ticket, new_status: TicketStatus) -> None:
     ticket.resolved_at = _now() if new_status == TicketStatus.RESOLVED else None
 
 
-def update_ticket_status(db: Session, ticket: Ticket, new_status: TicketStatus) -> Ticket:
+def update_ticket_status(db: Session, ticket: Ticket, current_user: User, new_status: TicketStatus) -> Ticket:
+    old_status = ticket.status
+    event_time = _now()
     _apply_status_transition(ticket, new_status)
+    ticket.updated_at = event_time
+    _notify_status_changed(db, ticket, current_user, old_status, event_time)
     db.add(ticket)
     db.commit()
     return get_ticket_or_404(db, ticket.id)
@@ -294,11 +681,15 @@ def update_agent_ticket_status(db: Session, ticket: Ticket, current_user: User, 
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Support agents can only move tickets to In Progress or Resolved",
         )
-    return update_ticket_status(db, ticket, new_status)
+    return update_ticket_status(db, ticket, current_user, new_status)
 
 
-def update_ticket_priority(db: Session, ticket: Ticket, new_priority: TicketPriority) -> Ticket:
+def update_ticket_priority(db: Session, ticket: Ticket, current_user: User, new_priority: TicketPriority) -> Ticket:
+    old_priority = ticket.priority
+    event_time = _now()
     ticket.priority = new_priority
+    ticket.updated_at = event_time
+    _notify_priority_changed(db, ticket, current_user, old_priority, event_time)
     db.add(ticket)
     db.commit()
     return get_ticket_or_404(db, ticket.id)
@@ -311,19 +702,24 @@ def _get_support_agent_or_400(db: Session, assigned_to_id: int) -> User:
     return target_agent
 
 
-def assign_ticket(db: Session, ticket: Ticket, assigned_to_id: int | None = None) -> Ticket:
+def assign_ticket(db: Session, ticket: Ticket, current_user: User, assigned_to_id: int | None = None) -> Ticket:
+    old_assignee_id = ticket.assigned_to_id
+    event_time = _now()
+    target_agent = None
     if assigned_to_id is None:
         ticket.assigned_to_id = None
     else:
         target_agent = _get_support_agent_or_400(db, assigned_to_id)
         ticket.assigned_to_id = target_agent.id
+    ticket.updated_at = event_time
+    _notify_assignment_changed(db, ticket, current_user, old_assignee_id, target_agent, event_time)
     db.add(ticket)
     db.commit()
     return get_ticket_or_404(db, ticket.id)
 
 
-def reassign_ticket(db: Session, ticket: Ticket, assigned_to_id: int) -> Ticket:
-    return assign_ticket(db, ticket, assigned_to_id)
+def reassign_ticket(db: Session, ticket: Ticket, current_user: User, assigned_to_id: int) -> Ticket:
+    return assign_ticket(db, ticket, current_user, assigned_to_id)
 
 
 def create_reassignment_request(
@@ -351,8 +747,10 @@ def create_reassignment_request(
         status=AssignmentRequestStatus.PENDING,
     )
     db.add(request)
+    db.flush()
+    request = get_reassignment_request_or_404(db, request.id)
+    _notify_reassignment_requested(db, request, current_user)
     db.commit()
-    db.refresh(request)
     return get_reassignment_request_or_404(db, request.id)
 
 
@@ -383,21 +781,29 @@ def resolve_reassignment_request(
     db: Session,
     request: TicketAssignmentRequest,
     payload: ReassignmentRequestDecision,
+    current_user: User,
 ) -> TicketAssignmentRequest:
     if request.status != AssignmentRequestStatus.PENDING:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Request has already been resolved")
     if payload.status not in (AssignmentRequestStatus.APPROVED, AssignmentRequestStatus.REJECTED):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Decision must be Approved or Rejected")
 
+    new_assignee = None
     if payload.status == AssignmentRequestStatus.APPROVED:
         if payload.assigned_to_id is None:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Approved requests require a new assignee")
         ticket = get_ticket_or_404(db, request.ticket_id)
-        reassign_ticket(db, ticket, payload.assigned_to_id)
+        new_assignee = _get_support_agent_or_400(db, payload.assigned_to_id)
+        ticket.assigned_to_id = new_assignee.id
+        ticket.updated_at = _now()
+        db.add(ticket)
 
     request.status = payload.status
     request.admin_response = payload.admin_response.strip() if payload.admin_response else None
     request.resolved_at = _now()
     db.add(request)
+    db.flush()
+    request = get_reassignment_request_or_404(db, request.id)
+    _notify_reassignment_decision(db, request, current_user, new_assignee)
     db.commit()
     return get_reassignment_request_or_404(db, request.id)

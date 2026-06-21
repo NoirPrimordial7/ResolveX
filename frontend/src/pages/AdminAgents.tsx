@@ -26,23 +26,23 @@ export default function AdminAgents() {
   return (
     <div className="space-y-5">
       <PageHeader
-        description="Monitor support agent capacity before assigning or reassigning tickets."
-        eyebrow="Admin Agents"
-        title="Support Agent Workload"
+        description="Monitor faculty coordinator capacity before assigning or handing over placement queries."
+        eyebrow="Placement Head"
+        title="Faculty Coordinator Workload"
       />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        <StatCard description="Active support users" indicator="Team" title="Agents" value={agents.length} />
-        <StatCard description="Open or in progress" indicator="Owned" title="Active Tickets" tone="blue" value={activeTickets} />
-        <StatCard description="Completed by agents" indicator="Done" title="Resolved Tickets" tone="green" value={resolvedTickets} />
+        <StatCard description="Active faculty users" indicator="Team" title="Faculty" value={agents.length} />
+        <StatCard description="Open or in progress" indicator="Owned" title="Active Queries" tone="blue" value={activeTickets} />
+        <StatCard description="Completed by faculty" indicator="Done" title="Resolved Queries" tone="green" value={resolvedTickets} />
       </div>
 
       {loading ? (
-        <Card className="p-5 text-sm text-[#A7A29A]">Loading agents...</Card>
+        <Card className="p-5 text-sm app-text-muted">Loading faculty coordinators...</Card>
       ) : agents.length === 0 ? (
         <EmptyState
-          description="Create support agents with python -m app.create_agent, then they will appear here."
-          title="No support agents found"
+          description="Create faculty coordinator users with python -m app.create_agent, then they will appear here."
+          title="No faculty coordinators found"
         />
       ) : (
         <div className="grid gap-4 lg:grid-cols-2 2xl:grid-cols-3">
@@ -52,30 +52,30 @@ export default function AdminAgents() {
                 <div className="flex min-w-0 items-center gap-3">
                   <Avatar user={agent} />
                   <div className="min-w-0">
-                    <h2 className="truncate text-xs font-black uppercase text-[#F5F1EA]">{agent.full_name}</h2>
-                    <p className="mt-1 flex min-w-0 items-center gap-2 truncate text-sm text-[#A7A29A]">
+                    <h2 className="truncate text-xs font-black uppercase app-text-primary">{agent.full_name}</h2>
+                    <p className="mt-1 flex min-w-0 items-center gap-2 truncate text-sm app-text-muted">
                     <PixelIcon name="mail" size={16} />
                     {agent.email}
                   </p>
                   </div>
                 </div>
-                <span className="rounded-sm bg-accent-500/10 px-2.5 py-1 text-[11px] font-black uppercase text-accent-200">
+                <span className="rounded-sm bg-accent-500/10 px-2.5 py-1 text-[11px] font-black uppercase text-orange-700 dark:text-accent-200">
                   {agent.active_ticket_count} active
                 </span>
               </div>
 
               <div className="mt-5 grid grid-cols-3 gap-3 text-center">
-                <div className="rounded-sm border border-white/10 bg-white/[0.04] p-3">
-                  <p className="display-type text-3xl leading-none text-[#F5F1EA]">{agent.open_ticket_count}</p>
-                  <p className="text-[11px] font-black uppercase text-[#A7A29A]">Open</p>
+                <div className="app-card-muted p-3">
+                  <p className="display-type text-3xl leading-none app-text-primary">{agent.open_ticket_count}</p>
+                  <p className="text-[11px] font-black uppercase app-text-muted">Open</p>
                 </div>
-                <div className="rounded-sm border border-white/10 bg-white/[0.04] p-3">
-                  <p className="display-type text-3xl leading-none text-[#F5F1EA]">{agent.in_progress_ticket_count}</p>
-                  <p className="text-[11px] font-black uppercase text-[#A7A29A]">Active</p>
+                <div className="app-card-muted p-3">
+                  <p className="display-type text-3xl leading-none app-text-primary">{agent.in_progress_ticket_count}</p>
+                  <p className="text-[11px] font-black uppercase app-text-muted">Active</p>
                 </div>
-                <div className="rounded-sm border border-white/10 bg-white/[0.04] p-3">
-                  <p className="display-type text-3xl leading-none text-[#F5F1EA]">{agent.resolved_ticket_count}</p>
-                  <p className="text-[11px] font-black uppercase text-[#A7A29A]">Resolved</p>
+                <div className="app-card-muted p-3">
+                  <p className="display-type text-3xl leading-none app-text-primary">{agent.resolved_ticket_count}</p>
+                  <p className="text-[11px] font-black uppercase app-text-muted">Resolved</p>
                 </div>
               </div>
             </Card>
